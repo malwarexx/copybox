@@ -2283,6 +2283,7 @@ body.edit-mode .add-copybox-btn { display: flex; }
             </div>
           </div>
         </div>
+        <div class="data-menu-section" id="google-signed-section">
           <button class="data-menu-item" id="google-sync-btn" style="display:none">
             <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
             Sincronizar
@@ -4105,6 +4106,7 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     gAvatar.src = u.picture || ''; gUserName.textContent = u.name || ''; gUserEmail.textContent = u.email || '';
     gSigninBtn.style.display = 'none'; gSyncBtn.style.display = 'flex'; gSignoutBtn.style.display = 'flex';
     document.getElementById('google-signin-section').style.display = 'none';
+    document.getElementById('google-signed-section').style.display = 'block';
     dataMenuBtn.classList.add('signed-in');
     dataMenuBtn.textContent = '✓ ' + (u.name?.split(' ')[0] || 'Google');
   }
@@ -4113,6 +4115,7 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     gUserInfo.classList.remove('visible');
     gSigninBtn.style.display = 'flex'; gSyncBtn.style.display = 'none'; gSignoutBtn.style.display = 'none';
     document.getElementById('google-signin-section').style.display = 'block';
+    document.getElementById('google-signed-section').style.display = 'none';
     dataMenuBtn.classList.remove('signed-in'); dataMenuBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg> Datos';
   }
 
