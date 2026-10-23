@@ -4125,14 +4125,39 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
 
   async function getDriveId() {
     const r = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${GDRIVE_FILE}'&fields=files(id)`, { headers: { Authorization: `Bearer ${gToken}` } });
-    return (await r.json()).files?.[0]?.id || null;
+    const d = await r.json();
+    if (d.error) throw new Error(d.error.message);
+    return d.files?.[0]?.id || null;
+  }
+
+  // Request a fresh token silently (no popup if user already granted permission)
+  async function ensureToken() {
+    if (gToken) return true;
+    if (!gUser) return false;
+    if (GOOGLE_CLIENT_ID.includes('TU_CLIENT_ID')) return false;
+    return new Promise(resolve => {
+      try {
+        const client = google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: 'https://www.googleapis.com/auth/drive.appdata profile email',
+          prompt: '', // silent — no popup
+          hint: gUser.email,
+          callback: resp => {
+            if (resp.error) { resolve(false); return; }
+            gToken = resp.access_token;
+            resolve(true);
+          }
+        });
+        client.requestAccessToken();
+      } catch(e) { resolve(false); }
+    });
   }
 
   async function syncDrive() {
-    if (!gToken) return;
+    if (!await ensureToken()) { showToast('Reconectá tu cuenta Google', 'yellow'); return; }
     try {
       const icon = gSyncBtn.querySelector('.item-icon');
-      icon.textContent = '⏳';
+      icon.innerHTML = '⏳';
       const content = JSON.stringify({ profiles, activeProfileId, syncedAt: new Date().toISOString(), version: 2 });
       const fileId  = await getDriveId();
       const meta    = { name: GDRIVE_FILE, ...(fileId ? {} : { parents: ['appDataFolder'] }) };
@@ -4142,30 +4167,32 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
       const url = fileId
         ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
         : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
-      await fetch(url, { method: fileId ? 'PATCH' : 'POST', headers: { Authorization: `Bearer ${gToken}` }, body: form });
-      icon.textContent = '🔄';
+      const res = await fetch(url, { method: fileId ? 'PATCH' : 'POST', headers: { Authorization: `Bearer ${gToken}` }, body: form });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      icon.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>`;
       showToast('☁️ Guardado en Google Drive', 'green'); sfx('copy');
-    } catch(e) { showToast('❌ Error al guardar', 'red'); }
+    } catch(e) { showToast('❌ Error al guardar: ' + e.message, 'red'); }
   }
 
   async function loadFromDrive() {
-    if (!gToken) return false;
+    if (!await ensureToken()) { showToast('Reconectá tu cuenta Google', 'yellow'); return false; }
     try {
+      showToast('⏳ Cargando desde Drive...', 'blue');
       const fileId = await getDriveId();
-      if (!fileId) return false;
+      if (!fileId) { showToast('No hay datos guardados en Drive aún', 'yellow'); return false; }
       const r = await fetch(
         `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
         { headers: { Authorization: `Bearer ${gToken}` } }
       );
-      if (!r.ok) return false;
+      if (!r.ok) throw new Error('HTTP ' + r.status);
       const data = await r.json();
-      if (!data.profiles || !Array.isArray(data.profiles)) return false;
+      if (!data.profiles || !Array.isArray(data.profiles)) throw new Error('Formato inválido');
       profiles        = data.profiles;
       activeProfileId = data.activeProfileId || profiles[0]?.id || null;
       save(); renderApp(true);
-      showToast(`☁️ ${data.profiles.length} perfiles cargados desde Drive`, 'green');
+      showToast(`☁️ ${data.profiles.length} perfil(es) cargados desde Drive`, 'green');
       return true;
-    } catch(e) { return false; }
+    } catch(e) { showToast('❌ Error al cargar: ' + e.message, 'red'); return false; }
   }
 
   // Expose loadFromDrive for the menu button
