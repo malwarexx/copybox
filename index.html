@@ -4087,14 +4087,16 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
         gToken = resp.access_token;
         const ui = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${gToken}` } }).then(r => r.json());
         gUser = ui; localStorage.setItem('copybox_guser', JSON.stringify(ui));
-        showGUser(ui); await syncDrive();
+        showGUser(ui);
+        // Try to load existing data from Drive first, then sync
+        const loaded = await loadFromDrive();
+        if (!loaded) await syncDrive(); // no Drive data yet → upload current data
         showToast(`✓ Conectado como ${ui.name}`, 'green'); sfx('prof');
       }
     });
     client.requestAccessToken();
   });
 
-  gSyncBtn.addEventListener('click', async () => { dataDropdown.classList.remove('open'); if (!gToken) { showToast('Reconectá tu cuenta Google', 'yellow'); return; } await syncDrive(); });
   gSignoutBtn.addEventListener('click', () => {
     dataDropdown.classList.remove('open');
     gToken = null; gUser = null; localStorage.removeItem('copybox_guser');
@@ -4107,6 +4109,7 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     gSigninBtn.style.display = 'none'; gSyncBtn.style.display = 'flex'; gSignoutBtn.style.display = 'flex';
     document.getElementById('google-signin-section').style.display = 'none';
     document.getElementById('google-signed-section').style.display = 'block';
+    const lb = document.getElementById('google-load-btn'); if(lb) lb.style.display='flex';
     dataMenuBtn.classList.add('signed-in');
     dataMenuBtn.textContent = '✓ ' + (u.name?.split(' ')[0] || 'Google');
   }
@@ -4116,6 +4119,7 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     gSigninBtn.style.display = 'flex'; gSyncBtn.style.display = 'none'; gSignoutBtn.style.display = 'none';
     document.getElementById('google-signin-section').style.display = 'block';
     document.getElementById('google-signed-section').style.display = 'none';
+    const lb = document.getElementById('google-load-btn'); if(lb) lb.style.display='none';
     dataMenuBtn.classList.remove('signed-in'); dataMenuBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg> Datos';
   }
 
@@ -4140,16 +4144,55 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
         : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
       await fetch(url, { method: fileId ? 'PATCH' : 'POST', headers: { Authorization: `Bearer ${gToken}` }, body: form });
       icon.textContent = '🔄';
-      showToast('☁️ Sincronizado con Google Drive', 'green'); sfx('copy');
-    } catch(e) { showToast('❌ Error al sincronizar', 'red'); }
+      showToast('☁️ Guardado en Google Drive', 'green'); sfx('copy');
+    } catch(e) { showToast('❌ Error al guardar', 'red'); }
   }
 
-  // Auto-sync 10s after any save
-  let syncTimer = null;
-  setTimeout(() => {
-    const orig = save;
-    window.save = function() { orig(); if (gToken) { clearTimeout(syncTimer); syncTimer = setTimeout(syncDrive, 10000); } };
-  }, 800);
+  async function loadFromDrive() {
+    if (!gToken) return false;
+    try {
+      const fileId = await getDriveId();
+      if (!fileId) return false;
+      const r = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+        { headers: { Authorization: `Bearer ${gToken}` } }
+      );
+      if (!r.ok) return false;
+      const data = await r.json();
+      if (!data.profiles || !Array.isArray(data.profiles)) return false;
+      profiles        = data.profiles;
+      activeProfileId = data.activeProfileId || profiles[0]?.id || null;
+      save(); renderApp(true);
+      showToast(`☁️ ${data.profiles.length} perfiles cargados desde Drive`, 'green');
+      return true;
+    } catch(e) { return false; }
+  }
+
+  // Expose loadFromDrive for the menu button
+  document.getElementById('google-sync-btn').addEventListener('click', async () => {
+    dataDropdown.classList.remove('open');
+    if (!gToken) { showToast('Reconectá tu cuenta Google', 'yellow'); return; }
+    await syncDrive();
+  });
+
+  // Add "Cargar desde Drive" button dynamically when signed in
+  function addLoadBtn() {
+    if (document.getElementById('google-load-btn')) return;
+    const btn = document.createElement('button');
+    btn.className = 'data-menu-item';
+    btn.id = 'google-load-btn';
+    btn.style.display = 'none';
+    btn.innerHTML = `<svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Cargar desde Drive`;
+    btn.addEventListener('click', async () => {
+      dataDropdown.classList.remove('open');
+      if (!gToken) { showToast('Reconectá tu cuenta Google', 'yellow'); return; }
+      if (confirm('¿Cargar datos desde Google Drive? Esto reemplazará los datos locales actuales.')) {
+        await loadFromDrive();
+      }
+    });
+    document.getElementById('google-signed-section').appendChild(btn);
+  }
+  addLoadBtn();
 })();
 
 /* ══════════════════════════════════════════════════════════
