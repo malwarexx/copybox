@@ -4073,6 +4073,9 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
 
   const stored = localStorage.getItem('copybox_guser');
   if (stored) { try { gUser = JSON.parse(stored); showGUser(gUser); } catch(e) {} }
+  // Restore token if still valid (tokens last ~1hr)
+  const storedToken = localStorage.getItem('copybox_gtoken_tmp');
+  if (storedToken) gToken = storedToken;
 
   gSigninBtn.addEventListener('click', () => {
     dataDropdown.classList.remove('open');
@@ -4086,6 +4089,7 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
       callback: async resp => {
         if (resp.error) { showToast('❌ Error de Google: ' + resp.error, 'red'); return; }
         gToken = resp.access_token;
+        localStorage.setItem('copybox_gtoken_tmp', gToken);
         const ui = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${gToken}` } }).then(r => r.json());
         gUser = ui; localStorage.setItem('copybox_guser', JSON.stringify(ui));
         showGUser(ui);
@@ -4099,7 +4103,9 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
 
   gSignoutBtn.addEventListener('click', () => {
     dataDropdown.classList.remove('open');
-    gToken = null; gUser = null; localStorage.removeItem('copybox_guser');
+    gToken = null; gUser = null;
+    localStorage.removeItem('copybox_guser');
+    localStorage.removeItem('copybox_gtoken_tmp');
     hideGUser(); showToast('Sesión de Google cerrada', 'yellow');
   });
 
