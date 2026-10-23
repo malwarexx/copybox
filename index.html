@@ -4082,19 +4082,19 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     const client = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
       scope: 'https://www.googleapis.com/auth/drive.appdata profile email',
+      prompt: 'consent',
       callback: async resp => {
-        if (resp.error) { showToast('❌ Error de Google', 'red'); return; }
+        if (resp.error) { showToast('❌ Error de Google: ' + resp.error, 'red'); return; }
         gToken = resp.access_token;
         const ui = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${gToken}` } }).then(r => r.json());
         gUser = ui; localStorage.setItem('copybox_guser', JSON.stringify(ui));
         showGUser(ui);
-        // Try to load existing data from Drive first, then sync
         const loaded = await loadFromDrive();
-        if (!loaded) await syncDrive(); // no Drive data yet → upload current data
+        if (!loaded) await syncDrive();
         showToast(`✓ Conectado como ${ui.name}`, 'green'); sfx('prof');
       }
     });
-    client.requestAccessToken();
+    client.requestAccessToken({ prompt: 'consent' });
   });
 
   gSignoutBtn.addEventListener('click', () => {
