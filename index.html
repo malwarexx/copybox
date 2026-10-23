@@ -6,6 +6,7 @@
 <title>CopyBox</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 /* ══════════════════════════════════════════════════════════
    RESET & TOKENS
@@ -1013,7 +1014,68 @@ body.edit-mode .add-copybox-btn { display: flex; }
    TRANSLATION
 ══════════════════════════════════════════════════════════ */
 
-/* dropdown */
+/* ══════════════════════════════════════════════════════════
+   DATA MENU (Google + Export/Import)
+══════════════════════════════════════════════════════════ */
+#data-menu-wrap { position: relative; flex-shrink: 0; }
+
+#data-menu-btn {
+  gap: 5px;
+  background: rgba(66,133,244,0.08);
+  border-color: rgba(66,133,244,0.3);
+  color: rgba(66,133,244,0.9);
+}
+#data-menu-btn:hover { background: rgba(66,133,244,0.14); color: #60a5fa; }
+#data-menu-btn.signed-in { background: rgba(52,211,153,0.08); border-color: rgba(52,211,153,0.3); color: #34d399; }
+
+#data-dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: rgba(13,13,22,0.99);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  min-width: 210px;
+  z-index: 400;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.6);
+  overflow: hidden;
+  animation: dropIn 0.18s cubic-bezier(0.34,1.4,0.64,1);
+}
+#data-dropdown.open { display: block; }
+
+.data-menu-section { padding: 6px 0; border-bottom: 1px solid var(--border); }
+.data-menu-section:last-child { border-bottom: none; }
+
+.data-menu-label {
+  font-size: 0.62rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text3); padding: 6px 14px 2px;
+}
+
+.data-menu-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 14px; font-size: 0.81rem; font-weight: 500;
+  color: var(--text2); cursor: pointer; background: none; border: none;
+  width: 100%; text-align: left; font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.data-menu-item:hover { background: var(--surface2); color: var(--text); }
+.data-menu-item .item-icon { font-size: 1rem; flex-shrink: 0; }
+.data-menu-item.danger:hover { background: rgba(248,113,113,0.1); color: var(--red); }
+
+#google-user-info {
+  display: none; align-items: center; gap: 9px;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+#google-user-info.visible { display: flex; }
+#google-avatar { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; border: 1.5px solid rgba(52,211,153,0.4); }
+#google-user-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+#google-user-email { font-size: 0.68rem; color: var(--text3); }
+
+/* hidden file input for import */
+#json-import-input { display: none; }
+
+/* ── dropdown */
 #translate-wrap {
   position: relative;
   flex-shrink: 0;
@@ -2168,6 +2230,32 @@ body.edit-mode .add-copybox-btn { display: flex; }
     <button id="paste-import-btn" class="btn btn-ghost" title="Pegar contenido masivo">
       📥 Pegar
     </button>
+    <div id="data-menu-wrap">
+      <button id="data-menu-btn" class="btn btn-ghost" title="Datos y cuenta">
+        ☁️ Datos
+      </button>
+      <div id="data-dropdown">
+        <div id="google-user-info">
+          <img id="google-avatar" src="" alt="avatar"/>
+          <div>
+            <div id="google-user-name"></div>
+            <div id="google-user-email"></div>
+          </div>
+        </div>
+        <div class="data-menu-section">
+          <div class="data-menu-label">Google</div>
+          <button class="data-menu-item" id="google-signin-btn"><span class="item-icon">🔵</span>Conectar con Google</button>
+          <button class="data-menu-item" id="google-sync-btn" style="display:none"><span class="item-icon">🔄</span>Sincronizar ahora</button>
+          <button class="data-menu-item danger" id="google-signout-btn" style="display:none"><span class="item-icon">🚪</span>Cerrar sesión</button>
+        </div>
+        <div class="data-menu-section">
+          <div class="data-menu-label">Local</div>
+          <button class="data-menu-item" id="export-json-btn"><span class="item-icon">📤</span>Exportar JSON</button>
+          <button class="data-menu-item" id="import-json-btn"><span class="item-icon">📥</span>Importar JSON</button>
+        </div>
+      </div>
+    </div>
+    <input type="file" id="json-import-input" accept=".json">
     <button id="ai-chat-btn" class="btn btn-ghost" title="IA Chatbox" style="background:rgba(155,111,255,0.08);border-color:rgba(155,111,255,0.3);color:#c4b5fd;">
       ✦ IA
     </button>
@@ -3865,6 +3953,141 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
 
   // ── Init ──
   checkKey();
+})();
+
+/* ══════════════════════════════════════════════════════════
+   DATA MENU — Export / Import / Google Drive
+══════════════════════════════════════════════════════════ */
+(function() {
+  const dataMenuBtn   = document.getElementById('data-menu-btn');
+  const dataDropdown  = document.getElementById('data-dropdown');
+  const exportBtn     = document.getElementById('export-json-btn');
+  const importBtn     = document.getElementById('import-json-btn');
+  const importInput   = document.getElementById('json-import-input');
+  const gSigninBtn    = document.getElementById('google-signin-btn');
+  const gSyncBtn      = document.getElementById('google-sync-btn');
+  const gSignoutBtn   = document.getElementById('google-signout-btn');
+  const gUserInfo     = document.getElementById('google-user-info');
+  const gAvatar       = document.getElementById('google-avatar');
+  const gUserName     = document.getElementById('google-user-name');
+  const gUserEmail    = document.getElementById('google-user-email');
+
+  dataMenuBtn.addEventListener('click', e => { e.stopPropagation(); dataDropdown.classList.toggle('open'); });
+  document.addEventListener('click', () => dataDropdown.classList.remove('open'));
+
+  // ── EXPORT ──
+  exportBtn.addEventListener('click', () => {
+    dataDropdown.classList.remove('open');
+    const data = { profiles, activeProfileId, exportedAt: new Date().toISOString(), version: 2 };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = Object.assign(document.createElement('a'), { href: url, download: `copybox-backup-${new Date().toISOString().slice(0,10)}.json` });
+    a.click(); URL.revokeObjectURL(url);
+    showToast('📤 Backup exportado', 'green'); sfx('copy');
+  });
+
+  // ── IMPORT ──
+  importBtn.addEventListener('click', () => { dataDropdown.classList.remove('open'); importInput.click(); });
+  importInput.addEventListener('change', e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.profiles || !Array.isArray(data.profiles)) throw new Error();
+        if (confirm(`¿Reemplazar todos los datos con el backup?\n(${data.profiles.length} perfiles)`)) {
+          profiles = data.profiles;
+          activeProfileId = data.activeProfileId || profiles[0]?.id || null;
+          save(); renderApp(true);
+          showToast(`✓ ${data.profiles.length} perfiles importados`, 'green'); sfx('prof');
+        }
+      } catch(err) { showToast('❌ Archivo inválido', 'red'); }
+      importInput.value = '';
+    };
+    reader.readAsText(file);
+  });
+
+  // ── GOOGLE SIGN-IN ──
+  // Paste your Google Client ID here once you have it from console.cloud.google.com
+  const GOOGLE_CLIENT_ID = 'TU_CLIENT_ID_AQUI.apps.googleusercontent.com';
+  const GDRIVE_FILE      = 'copybox-data.json';
+  let gToken = null, gUser = null;
+
+  const stored = localStorage.getItem('copybox_guser');
+  if (stored) { try { gUser = JSON.parse(stored); showGUser(gUser); } catch(e) {} }
+
+  gSigninBtn.addEventListener('click', () => {
+    dataDropdown.classList.remove('open');
+    if (GOOGLE_CLIENT_ID.includes('TU_CLIENT_ID')) {
+      showToast('⚠️ Configurá tu Google Client ID en el código', 'yellow'); return;
+    }
+    const client = google.accounts.oauth2.initTokenClient({
+      client_id: GOOGLE_CLIENT_ID,
+      scope: 'https://www.googleapis.com/auth/drive.appdata profile email',
+      callback: async resp => {
+        if (resp.error) { showToast('❌ Error de Google', 'red'); return; }
+        gToken = resp.access_token;
+        const ui = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${gToken}` } }).then(r => r.json());
+        gUser = ui; localStorage.setItem('copybox_guser', JSON.stringify(ui));
+        showGUser(ui); await syncDrive();
+        showToast(`✓ Conectado como ${ui.name}`, 'green'); sfx('prof');
+      }
+    });
+    client.requestAccessToken();
+  });
+
+  gSyncBtn.addEventListener('click', async () => { dataDropdown.classList.remove('open'); if (!gToken) { showToast('Reconectá tu cuenta Google', 'yellow'); return; } await syncDrive(); });
+  gSignoutBtn.addEventListener('click', () => {
+    dataDropdown.classList.remove('open');
+    gToken = null; gUser = null; localStorage.removeItem('copybox_guser');
+    hideGUser(); showToast('Sesión de Google cerrada', 'yellow');
+  });
+
+  function showGUser(u) {
+    gUserInfo.classList.add('visible');
+    gAvatar.src = u.picture || ''; gUserName.textContent = u.name || ''; gUserEmail.textContent = u.email || '';
+    gSigninBtn.style.display = 'none'; gSyncBtn.style.display = 'flex'; gSignoutBtn.style.display = 'flex';
+    dataMenuBtn.classList.add('signed-in');
+    dataMenuBtn.textContent = '✓ ' + (u.name?.split(' ')[0] || 'Google');
+  }
+
+  function hideGUser() {
+    gUserInfo.classList.remove('visible');
+    gSigninBtn.style.display = 'flex'; gSyncBtn.style.display = 'none'; gSignoutBtn.style.display = 'none';
+    dataMenuBtn.classList.remove('signed-in'); dataMenuBtn.innerHTML = '☁️ Datos';
+  }
+
+  async function getDriveId() {
+    const r = await fetch(`https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=name='${GDRIVE_FILE}'&fields=files(id)`, { headers: { Authorization: `Bearer ${gToken}` } });
+    return (await r.json()).files?.[0]?.id || null;
+  }
+
+  async function syncDrive() {
+    if (!gToken) return;
+    try {
+      const icon = gSyncBtn.querySelector('.item-icon');
+      icon.textContent = '⏳';
+      const content = JSON.stringify({ profiles, activeProfileId, syncedAt: new Date().toISOString(), version: 2 });
+      const fileId  = await getDriveId();
+      const meta    = { name: GDRIVE_FILE, ...(fileId ? {} : { parents: ['appDataFolder'] }) };
+      const form    = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+      form.append('file',     new Blob([content],              { type: 'application/json' }));
+      const url = fileId
+        ? `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=multipart`
+        : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart`;
+      await fetch(url, { method: fileId ? 'PATCH' : 'POST', headers: { Authorization: `Bearer ${gToken}` }, body: form });
+      icon.textContent = '🔄';
+      showToast('☁️ Sincronizado con Google Drive', 'green'); sfx('copy');
+    } catch(e) { showToast('❌ Error al sincronizar', 'red'); }
+  }
+
+  // Auto-sync 10s after any save
+  let syncTimer = null;
+  setTimeout(() => {
+    const orig = save;
+    window.save = function() { orig(); if (gToken) { clearTimeout(syncTimer); syncTimer = setTimeout(syncDrive, 10000); } };
+  }, 800);
 })();
 
 /* ══════════════════════════════════════════════════════════
