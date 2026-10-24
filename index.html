@@ -1675,6 +1675,163 @@ body.edit-mode .add-copybox-btn { display: flex; }
 .ai-key-reset:hover { color: var(--red); }
 
 /* ══════════════════════════════════════════════════════════
+   CLIENTS PANEL
+══════════════════════════════════════════════════════════ */
+#clients-panel {
+  position: fixed;
+  top: 0; left: 0;
+  width: 360px;
+  height: 100vh;
+  background: rgba(10,10,18,0.98);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  z-index: 600;
+  transform: translateX(-100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+#clients-panel.open { transform: translateX(0); }
+
+.cp-header {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+  background: rgba(52,211,153,0.04);
+}
+
+.cp-title {
+  flex: 1;
+  font-size: 0.92rem; font-weight: 800;
+  background: linear-gradient(135deg, #34d399, #60a5fa);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+
+.cp-close {
+  width: 28px; height: 28px; border-radius: var(--radius-sm);
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; font-size: 0.85rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.cp-close:hover { background: var(--surface3); color: var(--text); }
+
+/* active client banner */
+#cp-active-bar {
+  display: none;
+  padding: 10px 16px;
+  background: rgba(52,211,153,0.08);
+  border-bottom: 1px solid rgba(52,211,153,0.2);
+  font-size: 0.78rem;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+#cp-active-bar.visible { display: flex; }
+#cp-active-bar strong { color: #34d399; }
+#cp-clear-btn {
+  margin-left: auto; background: none; border: none;
+  color: var(--text3); cursor: pointer; font-size: 0.7rem;
+  font-family: inherit; padding: 2px 6px; border-radius: 5px;
+  transition: all 0.15s;
+}
+#cp-clear-btn:hover { color: var(--red); background: rgba(248,113,113,0.1); }
+
+/* search */
+.cp-search-wrap {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+#cp-search {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font-size: 0.82rem;
+  font-family: inherit;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+#cp-search:focus { border-color: rgba(52,211,153,0.45); }
+#cp-search::placeholder { color: var(--text3); }
+
+/* client list */
+#cp-list {
+  flex: 1; overflow-y: auto; padding: 6px 10px;
+}
+#cp-list::-webkit-scrollbar { width: 3px; }
+#cp-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 3px; }
+
+.cp-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: var(--radius-sm);
+  cursor: pointer; border: 1px solid transparent;
+  transition: all 0.15s; margin-bottom: 2px;
+  animation: profIn 0.25s cubic-bezier(0.34,1.4,0.64,1) both;
+}
+.cp-item:hover { background: var(--surface2); border-color: var(--border); }
+.cp-item.active { background: rgba(52,211,153,0.1); border-color: rgba(52,211,153,0.3); }
+
+.cp-avatar {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: linear-gradient(135deg, rgba(52,211,153,0.2), rgba(96,165,250,0.2));
+  border: 1.5px solid rgba(52,211,153,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.75rem; font-weight: 800; color: #34d399;
+  flex-shrink: 0;
+}
+
+.cp-info { flex: 1; min-width: 0; }
+.cp-name { font-size: 0.83rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cp-app  { font-size: 0.68rem; color: var(--text3); margin-top: 1px; }
+
+.cp-del-btn {
+  background: none; border: none; color: var(--text3);
+  cursor: pointer; font-size: 0.7rem; padding: 3px 6px;
+  border-radius: 5px; transition: all 0.15s; opacity: 0;
+  font-family: inherit;
+}
+.cp-item:hover .cp-del-btn { opacity: 1; }
+.cp-del-btn:hover { color: var(--red); background: rgba(248,113,113,0.12); }
+
+/* add client form */
+.cp-footer {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.cp-form-title {
+  font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text3); margin-bottom: 8px;
+}
+
+.cp-form-row { display: flex; gap: 6px; margin-bottom: 6px; }
+
+.cp-input {
+  flex: 1; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: var(--radius-sm); color: var(--text); font-size: 0.78rem;
+  font-family: inherit; padding: 7px 10px; outline: none;
+  transition: border-color 0.15s;
+}
+.cp-input:focus { border-color: rgba(52,211,153,0.45); }
+.cp-input::placeholder { color: var(--text3); }
+
+#cp-add-btn {
+  width: 100%; padding: 9px; border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, rgba(52,211,153,0.2), rgba(96,165,250,0.15));
+  border: 1px solid rgba(52,211,153,0.35); color: #34d399;
+  font-size: 0.8rem; font-weight: 700; cursor: pointer;
+  font-family: inherit; transition: all 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+#cp-add-btn:hover { background: rgba(52,211,153,0.18); border-color: rgba(52,211,153,0.55); transform: translateY(-1px); }
+
+/* ══════════════════════════════════════════════════════════
    CTRL HINT
 ══════════════════════════════════════════════════════════ */
 #ctrl-hint {
@@ -2311,6 +2468,10 @@ body.edit-mode .add-copybox-btn { display: flex; }
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
       IA
     </button>
+    <button id="clients-btn" class="btn btn-ghost" title="Clientes" style="background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.3);color:#34d399;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      Clientes
+    </button>
     <button id="add-category-btn" class="btn btn-primary">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Categoría
@@ -2394,6 +2555,37 @@ body.edit-mode .add-copybox-btn { display: flex; }
       <button id="ai-send-btn" title="Enviar">➤</button>
     </div>
     <div class="ai-key-reset" id="ai-key-reset">🔑 Cambiar API key</div>
+  </div>
+</div>
+
+<!-- CLIENTS PANEL -->
+<div id="clients-panel">
+  <div class="cp-header">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span class="cp-title">Clientes</span>
+    <button class="cp-close" id="cp-close">✕</button>
+  </div>
+  <div id="cp-active-bar">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <span>Cliente activo: <strong id="cp-active-name">—</strong></span>
+    <button id="cp-clear-btn">✕ Quitar</button>
+  </div>
+  <div class="cp-search-wrap">
+    <input id="cp-search" type="text" placeholder="Buscar por nombre o app...">
+  </div>
+  <div id="cp-list"></div>
+  <div class="cp-footer">
+    <div class="cp-form-title">Agregar cliente</div>
+    <div class="cp-form-row">
+      <input class="cp-input" id="cp-name-input" type="text" placeholder="Nombre del cliente">
+    </div>
+    <div class="cp-form-row">
+      <input class="cp-input" id="cp-app-input" type="text" placeholder="Nombre de la app">
+    </div>
+    <button id="cp-add-btn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Agregar cliente
+    </button>
   </div>
 </div>
 
@@ -3029,11 +3221,26 @@ function buildBox(box, bi, cat, cats) {
     el.appendChild(rip);
     setTimeout(() => rip.remove(), 560);
 
-    navigator.clipboard.writeText(box.text).then(() => {
+    // Replace (nombre) and (app) with active client data
+    const client = window.getActiveClient ? window.getActiveClient() : null;
+    let textToCopy = box.text;
+    if (client) {
+      textToCopy = textToCopy
+        .replace(/\(nombre\)/gi, client.name)
+        .replace(/\(app\)/gi,    client.app);
+    }
+
+    navigator.clipboard.writeText(textToCopy).then(() => {
       el.classList.add('copied');
       setTimeout(() => el.classList.remove('copied'), 600);
       sfx('copy');
-      showToast('✓ Copiado', 'green');
+      if (!client && (box.text.includes('(nombre)') || box.text.includes('(app)'))) {
+        showToast('⚠️ Seleccioná un cliente en el panel Clientes', 'yellow');
+      } else if (client && textToCopy !== box.text) {
+        showToast(`✓ Copiado para ${client.name}`, 'green');
+      } else {
+        showToast('✓ Copiado', 'green');
+      }
     });
   });
 
@@ -4226,6 +4433,137 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     document.getElementById('google-signed-section').appendChild(btn);
   }
   addLoadBtn();
+})();
+
+/* ══════════════════════════════════════════════════════════
+   CLIENTS
+══════════════════════════════════════════════════════════ */
+(function() {
+  const panel       = document.getElementById('clients-panel');
+  const cpClose     = document.getElementById('cp-close');
+  const cpSearch    = document.getElementById('cp-search');
+  const cpList      = document.getElementById('cp-list');
+  const cpNameInput = document.getElementById('cp-name-input');
+  const cpAppInput  = document.getElementById('cp-app-input');
+  const cpAddBtn    = document.getElementById('cp-add-btn');
+  const cpActiveBar = document.getElementById('cp-active-bar');
+  const cpActiveName= document.getElementById('cp-active-name');
+  const cpClearBtn  = document.getElementById('cp-clear-btn');
+
+  const STORAGE_KEY = 'copybox_clients';
+  let clients = [];
+  let activeClient = null; // { name, app }
+
+  function saveClients() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(clients)); } catch(e) {}
+  }
+
+  function loadClients() {
+    try { const d = localStorage.getItem(STORAGE_KEY); if(d) clients = JSON.parse(d); } catch(e) {}
+  }
+
+  // ── Open / close ──
+  document.getElementById('clients-btn').addEventListener('click', () => {
+    panel.classList.add('open');
+    renderClients();
+  });
+  cpClose.addEventListener('click', () => panel.classList.remove('open'));
+
+  // ── Render list ──
+  function renderClients(filter) {
+    const q = (filter || cpSearch.value || '').toLowerCase();
+    const filtered = clients.filter(c =>
+      c.name.toLowerCase().includes(q) || c.app.toLowerCase().includes(q)
+    );
+    cpList.innerHTML = '';
+
+    if (!filtered.length) {
+      cpList.innerHTML = `<div style="text-align:center;padding:30px 10px;color:var(--text3);font-size:0.78rem;">${clients.length ? 'Sin resultados' : 'No hay clientes aún.<br>Agregá uno abajo.'}</div>`;
+      return;
+    }
+
+    filtered.forEach((c, i) => {
+      const item = document.createElement('div');
+      item.className = 'cp-item' + (activeClient && activeClient.name === c.name && activeClient.app === c.app ? ' active' : '');
+      item.style.animationDelay = (i * 0.04) + 's';
+
+      const initials = c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      item.innerHTML = `
+        <div class="cp-avatar">${initials}</div>
+        <div class="cp-info">
+          <div class="cp-name">${c.name}</div>
+          <div class="cp-app">${c.app}</div>
+        </div>
+        <button class="cp-del-btn" title="Eliminar">✕</button>
+      `;
+
+      // Select client
+      item.addEventListener('click', e => {
+        if (e.target.classList.contains('cp-del-btn')) return;
+        activeClient = { name: c.name, app: c.app };
+        cpActiveName.textContent = c.name + ' · ' + c.app;
+        cpActiveBar.classList.add('visible');
+        renderClients();
+        panel.classList.remove('open');
+        showToast(`✓ Cliente: ${c.name}`, 'green');
+        sfx('copy');
+      });
+
+      // Delete
+      item.querySelector('.cp-del-btn').addEventListener('click', e => {
+        e.stopPropagation();
+        clients.splice(clients.indexOf(c), 1);
+        if (activeClient && activeClient.name === c.name) {
+          activeClient = null;
+          cpActiveBar.classList.remove('visible');
+        }
+        saveClients();
+        renderClients();
+        sfx('del');
+      });
+
+      cpList.appendChild(item);
+    });
+  }
+
+  // ── Search ──
+  cpSearch.addEventListener('input', () => renderClients());
+
+  // ── Add client ──
+  cpAddBtn.addEventListener('click', addClient);
+  cpAppInput.addEventListener('keydown', e => { if(e.key==='Enter') addClient(); });
+  cpNameInput.addEventListener('keydown', e => { if(e.key==='Enter') cpAppInput.focus(); });
+
+  function addClient() {
+    const name = cpNameInput.value.trim();
+    const app  = cpAppInput.value.trim();
+    if (!name || !app) {
+      if (!name) cpNameInput.style.borderColor = 'var(--red)';
+      if (!app)  cpAppInput.style.borderColor  = 'var(--red)';
+      setTimeout(() => { cpNameInput.style.borderColor=''; cpAppInput.style.borderColor=''; }, 1500);
+      return;
+    }
+    clients.push({ name, app });
+    cpNameInput.value = ''; cpAppInput.value = '';
+    saveClients();
+    renderClients();
+    sfx('add');
+    showToast(`✓ ${name} agregado`, 'green');
+  }
+
+  // ── Clear active client ──
+  cpClearBtn.addEventListener('click', () => {
+    activeClient = null;
+    cpActiveBar.classList.remove('visible');
+    renderClients();
+    showToast('Cliente deseleccionado', 'yellow');
+  });
+
+  // ── Hook into copy — replace (nombre) and (app) ──
+  // Patch the copy click in buildBox to replace variables
+  window.getActiveClient = () => activeClient;
+
+  loadClients();
 })();
 
 /* ══════════════════════════════════════════════════════════
