@@ -4751,15 +4751,15 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
 
       const rows = data.values || [];
 
-      // Helper: the cell contains "543*****0168\nNAME" — take only what's after the last \n
-      // Also strip any remaining censored phone patterns
+      // Keep only words made of letters (and spaces/accents) — strips any numbers/symbols
       function cleanCell(val) {
         if (!val) return '';
-        // If contains newline, take the last line (name is after the number)
-        const lines = val.split('\n').map(l => l.trim()).filter(Boolean);
-        if (lines.length > 1) return lines[lines.length - 1];
-        // Fallback: strip censored patterns like 543*****0168
-        return val.replace(/\d[\d\*•·]+\d\s*/g, '').trim();
+        return val
+          .split('\n')                          // split multiline cells
+          .join(' ')                            // join into one string
+          .replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/g, ' ')  // remove anything that's not a letter
+          .replace(/\s+/g, ' ')                // collapse spaces
+          .trim();
       }
 
       clients = rows
