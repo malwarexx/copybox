@@ -4289,7 +4289,7 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     }
     const client = google.accounts.oauth2.initTokenClient({
       client_id: GOOGLE_CLIENT_ID,
-      scope: 'https://www.googleapis.com/auth/drive.appdata profile email',
+      scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/spreadsheets.readonly profile email',
       prompt: 'consent',
       callback: async resp => {
         if (resp.error) { showToast('❌ Error de Google: ' + resp.error, 'red'); return; }
@@ -4350,7 +4350,7 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
       try {
         const client = google.accounts.oauth2.initTokenClient({
           client_id: GOOGLE_CLIENT_ID,
-          scope: 'https://www.googleapis.com/auth/drive.appdata profile email',
+          scope: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/spreadsheets.readonly profile email',
           prompt: '', // silent — no popup
           hint: gUser.email,
           callback: resp => {
