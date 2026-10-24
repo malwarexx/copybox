@@ -1821,7 +1821,7 @@ body.edit-mode .add-copybox-btn { display: flex; }
 .cp-input:focus { border-color: rgba(52,211,153,0.45); }
 .cp-input::placeholder { color: var(--text3); }
 
-#cp-add-btn {
+#cp-add-btn, #cp-load-btn {
   width: 100%; padding: 9px; border-radius: var(--radius-sm);
   background: linear-gradient(135deg, rgba(52,211,153,0.2), rgba(96,165,250,0.15));
   border: 1px solid rgba(52,211,153,0.35); color: #34d399;
@@ -1829,7 +1829,7 @@ body.edit-mode .add-copybox-btn { display: flex; }
   font-family: inherit; transition: all 0.15s;
   display: flex; align-items: center; justify-content: center; gap: 6px;
 }
-#cp-add-btn:hover { background: rgba(52,211,153,0.18); border-color: rgba(52,211,153,0.55); transform: translateY(-1px); }
+#cp-add-btn:hover, #cp-load-btn:hover { background: rgba(52,211,153,0.18); border-color: rgba(52,211,153,0.55); transform: translateY(-1px); }
 
 /* ══════════════════════════════════════════════════════════
    CTRL HINT
@@ -2575,17 +2575,15 @@ body.edit-mode .add-copybox-btn { display: flex; }
   </div>
   <div id="cp-list"></div>
   <div class="cp-footer">
-    <div class="cp-form-title">Agregar cliente</div>
+    <div class="cp-form-title">Google Sheets</div>
     <div class="cp-form-row">
-      <input class="cp-input" id="cp-name-input" type="text" placeholder="Nombre del cliente">
+      <input class="cp-input" id="cp-sheet-input" type="text" placeholder="ID o URL de la hoja...">
     </div>
-    <div class="cp-form-row">
-      <input class="cp-input" id="cp-app-input" type="text" placeholder="Nombre de la app">
-    </div>
-    <button id="cp-add-btn">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Agregar cliente
+    <button id="cp-load-btn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span id="cp-load-label">Cargar clientes</span>
     </button>
+    <div id="cp-sheet-status" style="font-size:0.68rem;color:var(--text3);text-align:center;margin-top:6px;min-height:16px;"></div>
   </div>
 </div>
 
@@ -4436,122 +4434,50 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
 })();
 
 /* ══════════════════════════════════════════════════════════
-   CLIENTS
+   CLIENTS — Google Sheets integration
+   Reads columns E (app) and F (nombre) starting row 2
 ══════════════════════════════════════════════════════════ */
 (function() {
   const panel       = document.getElementById('clients-panel');
   const cpClose     = document.getElementById('cp-close');
   const cpSearch    = document.getElementById('cp-search');
   const cpList      = document.getElementById('cp-list');
-  const cpNameInput = document.getElementById('cp-name-input');
-  const cpAppInput  = document.getElementById('cp-app-input');
-  const cpAddBtn    = document.getElementById('cp-add-btn');
+  const cpSheetInput= document.getElementById('cp-sheet-input');
+  const cpLoadBtn   = document.getElementById('cp-load-btn');
+  const cpLoadLabel = document.getElementById('cp-load-label');
   const cpActiveBar = document.getElementById('cp-active-bar');
   const cpActiveName= document.getElementById('cp-active-name');
   const cpClearBtn  = document.getElementById('cp-clear-btn');
+  const cpStatus    = document.getElementById('cp-sheet-status');
 
-  const STORAGE_KEY = 'copybox_clients';
-  let clients = [];
-  let activeClient = null; // { name, app }
+  const STORAGE_KEY      = 'copybox_clients_v2';
+  const SHEET_ID_KEY     = 'copybox_sheet_id';
+  // Columns: E=5(app), F=6(name) — 1-indexed
+  const COL_APP  = 4; // index 4 = column E (0-indexed)
+  const COL_NAME = 5; // index 5 = column F
+
+  let clients     = [];
+  let activeClient = null;
 
   function saveClients() {
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(clients)); } catch(e) {}
   }
-
-  function loadClients() {
-    try { const d = localStorage.getItem(STORAGE_KEY); if(d) clients = JSON.parse(d); } catch(e) {}
+  function loadCached() {
+    try {
+      const d = localStorage.getItem(STORAGE_KEY);
+      if (d) clients = JSON.parse(d);
+      const sid = localStorage.getItem(SHEET_ID_KEY);
+      if (sid) cpSheetInput.value = sid;
+    } catch(e) {}
   }
 
-  // ── Open / close ──
+  // ── Open/close ──
   document.getElementById('clients-btn').addEventListener('click', () => {
     panel.classList.add('open');
     renderClients();
   });
   cpClose.addEventListener('click', () => panel.classList.remove('open'));
-
-  // ── Render list ──
-  function renderClients(filter) {
-    const q = (filter || cpSearch.value || '').toLowerCase();
-    const filtered = clients.filter(c =>
-      c.name.toLowerCase().includes(q) || c.app.toLowerCase().includes(q)
-    );
-    cpList.innerHTML = '';
-
-    if (!filtered.length) {
-      cpList.innerHTML = `<div style="text-align:center;padding:30px 10px;color:var(--text3);font-size:0.78rem;">${clients.length ? 'Sin resultados' : 'No hay clientes aún.<br>Agregá uno abajo.'}</div>`;
-      return;
-    }
-
-    filtered.forEach((c, i) => {
-      const item = document.createElement('div');
-      item.className = 'cp-item' + (activeClient && activeClient.name === c.name && activeClient.app === c.app ? ' active' : '');
-      item.style.animationDelay = (i * 0.04) + 's';
-
-      const initials = c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-      item.innerHTML = `
-        <div class="cp-avatar">${initials}</div>
-        <div class="cp-info">
-          <div class="cp-name">${c.name}</div>
-          <div class="cp-app">${c.app}</div>
-        </div>
-        <button class="cp-del-btn" title="Eliminar">✕</button>
-      `;
-
-      // Select client
-      item.addEventListener('click', e => {
-        if (e.target.classList.contains('cp-del-btn')) return;
-        activeClient = { name: c.name, app: c.app };
-        cpActiveName.textContent = c.name + ' · ' + c.app;
-        cpActiveBar.classList.add('visible');
-        renderClients();
-        panel.classList.remove('open');
-        showToast(`✓ Cliente: ${c.name}`, 'green');
-        sfx('copy');
-      });
-
-      // Delete
-      item.querySelector('.cp-del-btn').addEventListener('click', e => {
-        e.stopPropagation();
-        clients.splice(clients.indexOf(c), 1);
-        if (activeClient && activeClient.name === c.name) {
-          activeClient = null;
-          cpActiveBar.classList.remove('visible');
-        }
-        saveClients();
-        renderClients();
-        sfx('del');
-      });
-
-      cpList.appendChild(item);
-    });
-  }
-
-  // ── Search ──
-  cpSearch.addEventListener('input', () => renderClients());
-
-  // ── Add client ──
-  cpAddBtn.addEventListener('click', addClient);
-  cpAppInput.addEventListener('keydown', e => { if(e.key==='Enter') addClient(); });
-  cpNameInput.addEventListener('keydown', e => { if(e.key==='Enter') cpAppInput.focus(); });
-
-  function addClient() {
-    const name = cpNameInput.value.trim();
-    const app  = cpAppInput.value.trim();
-    if (!name || !app) {
-      if (!name) cpNameInput.style.borderColor = 'var(--red)';
-      if (!app)  cpAppInput.style.borderColor  = 'var(--red)';
-      setTimeout(() => { cpNameInput.style.borderColor=''; cpAppInput.style.borderColor=''; }, 1500);
-      return;
-    }
-    clients.push({ name, app });
-    cpNameInput.value = ''; cpAppInput.value = '';
-    saveClients();
-    renderClients();
-    sfx('add');
-    showToast(`✓ ${name} agregado`, 'green');
-  }
-
-  // ── Clear active client ──
+  cpSearch.addEventListener('input', renderClients);
   cpClearBtn.addEventListener('click', () => {
     activeClient = null;
     cpActiveBar.classList.remove('visible');
@@ -4559,11 +4485,113 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     showToast('Cliente deseleccionado', 'yellow');
   });
 
-  // ── Hook into copy — replace (nombre) and (app) ──
-  // Patch the copy click in buildBox to replace variables
+  // ── Extract Sheet ID from URL or raw ID ──
+  function parseSheetId(val) {
+    const m = val.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+    return m ? m[1] : val.trim();
+  }
+
+  // ── Load from Google Sheets via Sheets API ──
+  cpLoadBtn.addEventListener('click', async () => {
+    const raw = cpSheetInput.value.trim();
+    if (!raw) { cpSheetInput.style.borderColor='var(--red)'; setTimeout(()=>cpSheetInput.style.borderColor='',1500); return; }
+
+    const sheetId = parseSheetId(raw);
+    localStorage.setItem(SHEET_ID_KEY, raw);
+
+    // Need Google token
+    const token = localStorage.getItem('copybox_gtoken_tmp') || (window.getGToken ? window.getGToken() : null);
+    if (!token) {
+      cpStatus.textContent = '⚠️ Conectá tu cuenta Google primero (botón ☁️ Datos)';
+      cpStatus.style.color = 'var(--yellow)';
+      return;
+    }
+
+    cpLoadLabel.textContent = 'Cargando...';
+    cpLoadBtn.disabled = true;
+    cpStatus.textContent = '';
+
+    try {
+      // Read columns E and F from row 2 onwards
+      const range = encodeURIComponent('Hoja 1!E2:F200');
+      const url   = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`;
+      const res   = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const data  = await res.json();
+
+      if (data.error) throw new Error(data.error.message);
+
+      const rows = data.values || [];
+      clients = rows
+        .filter(r => r[0] || r[1]) // at least one cell has data
+        .map(r => ({ app: (r[0]||'').trim(), name: (r[1]||'').trim() }))
+        .filter(c => c.name); // must have a name
+
+      saveClients();
+      renderClients();
+      cpStatus.textContent = `✓ ${clients.length} clientes cargados`;
+      cpStatus.style.color = 'var(--green)';
+      showToast(`✓ ${clients.length} clientes desde Sheets`, 'green');
+      sfx('add');
+    } catch(e) {
+      cpStatus.textContent = '❌ ' + (e.message.includes('403') ? 'Sin acceso. Habilitá Google Sheets API.' : e.message);
+      cpStatus.style.color = 'var(--red)';
+      showToast('❌ Error al cargar hoja', 'red');
+    }
+
+    cpLoadLabel.textContent = 'Cargar clientes';
+    cpLoadBtn.disabled = false;
+  });
+
+  // ── Render list ──
+  function renderClients() {
+    const q = (cpSearch.value||'').toLowerCase();
+    const filtered = clients.filter(c =>
+      c.name.toLowerCase().includes(q) || (c.app||'').toLowerCase().includes(q)
+    );
+    cpList.innerHTML = '';
+
+    if (!filtered.length) {
+      cpList.innerHTML = `<div style="text-align:center;padding:30px 10px;color:var(--text3);font-size:0.78rem;line-height:1.6;">${
+        clients.length ? 'Sin resultados' : 'Pegá el ID o URL de tu Google Sheet<br>y clickeá "Cargar clientes"'
+      }</div>`;
+      return;
+    }
+
+    filtered.forEach((c, i) => {
+      const item = document.createElement('div');
+      item.className = 'cp-item' + (activeClient?.name===c.name && activeClient?.app===c.app ? ' active' : '');
+      item.style.animationDelay = (i * 0.03) + 's';
+
+      const initials = c.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+      item.innerHTML = `
+        <div class="cp-avatar">${initials}</div>
+        <div class="cp-info">
+          <div class="cp-name">${c.name}</div>
+          <div class="cp-app">${c.app||'—'}</div>
+        </div>
+      `;
+
+      item.addEventListener('click', () => {
+        activeClient = { name: c.name, app: c.app };
+        cpActiveName.textContent = c.name;
+        cpActiveBar.classList.add('visible');
+        renderClients();
+        panel.classList.remove('open');
+        showToast(`✓ ${c.name}`, 'green');
+        sfx('copy');
+      });
+
+      cpList.appendChild(item);
+    });
+  }
+
   window.getActiveClient = () => activeClient;
 
-  loadClients();
+  // Expose token getter for clients panel
+  window.getGToken = () => localStorage.getItem('copybox_gtoken_tmp');
+
+  loadCached();
+  renderClients();
 })();
 
 /* ══════════════════════════════════════════════════════════
