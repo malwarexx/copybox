@@ -4750,10 +4750,16 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
       if (data.error) throw new Error(data.error.message);
 
       const rows = data.values || [];
+
+      // Helper: strip censored phone patterns like "543*****0168 " from text
+      function cleanCell(val) {
+        return (val||'').replace(/\d+[\*•·]+\d+\s*/g, '').trim();
+      }
+
       clients = rows
-        .filter(r => r[0] || r[1]) // at least one cell has data
-        .map(r => ({ app: (r[0]||'').trim(), name: (r[1]||'').trim() }))
-        .filter(c => c.name); // must have a name
+        .filter(r => r[0] || r[1])
+        .map(r => ({ app: cleanCell(r[0]), name: cleanCell(r[1]) }))
+        .filter(c => c.name);
 
       saveClients();
       window._massClients = clients;
