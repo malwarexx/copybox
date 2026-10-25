@@ -15,6 +15,7 @@
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 :root {
+  /* ── Dark mode (default) ── */
   --bg:        #07070d;
   --bg2:       #0d0d16;
   --surface:   rgba(255,255,255,0.04);
@@ -33,8 +34,36 @@
   --pink:      #f472b6;
   --sidebar-w: 280px;
   --header-h:  60px;
-  --radius:    13px;
-  --radius-sm: 8px;
+  --radius:    16px;
+  --radius-sm: 10px;
+  /* cartoon */
+  --stroke:    3px;
+  --shadow-cartoon: 4px 4px 0px rgba(0,0,0,0.5);
+  --shadow-cartoon-hover: 6px 6px 0px rgba(0,0,0,0.6);
+  --card-bg:   rgba(255,255,255,0.05);
+}
+
+/* ── Light mode ── */
+body.light-mode {
+  --bg:        #f0ece8;
+  --bg2:       #e8e2dc;
+  --surface:   rgba(255,255,255,0.75);
+  --surface2:  rgba(255,255,255,0.9);
+  --surface3:  rgba(255,255,255,1);
+  --border:    rgba(0,0,0,0.08);
+  --border2:   rgba(0,0,0,0.14);
+  --text:      #1a1a2e;
+  --text2:     rgba(26,26,46,0.65);
+  --text3:     rgba(26,26,46,0.38);
+  --purple:    #7c3aed;
+  --blue:      #2563eb;
+  --green:     #059669;
+  --yellow:    #d97706;
+  --red:       #dc2626;
+  --pink:      #db2777;
+  --shadow-cartoon: 4px 4px 0px rgba(0,0,0,0.18);
+  --shadow-cartoon-hover: 6px 6px 0px rgba(0,0,0,0.22);
+  --card-bg:   #fff;
 }
 
 html { scroll-behavior: smooth; }
@@ -45,6 +74,7 @@ body {
   color: var(--text);
   font-family: 'Inter', system-ui, sans-serif;
   overflow-x: hidden;
+  transition: background 0.4s ease, color 0.3s ease;
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -472,43 +502,58 @@ header h1 {
 ══════════════════════════════════════════════════════════ */
 .btn {
   padding: 8px 16px;
-  border-radius: var(--radius-sm);
+  border-radius: 99px;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 800;
   cursor: pointer;
-  border: 1.5px solid transparent;
+  border: 2px solid rgba(0,0,0,0.15);
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-family: inherit;
-  transition: all 0.18s;
+  transition: all 0.15s cubic-bezier(0.34,1.5,0.64,1);
   position: relative;
   overflow: hidden;
   white-space: nowrap;
+  box-shadow: var(--shadow-cartoon);
+  letter-spacing: 0.2px;
 }
 
-.btn:active { transform: scale(0.95); }
+.btn:active {
+  transform: translate(2px, 2px) scale(0.97);
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.4);
+}
 
 .btn-ghost {
-  background: var(--surface);
+  background: var(--surface2);
   border-color: var(--border2);
   color: var(--text2);
+  box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
 }
-.btn-ghost:hover { background: var(--surface2); color: var(--text); border-color: rgba(255,255,255,0.2); }
+.btn-ghost:hover {
+  background: var(--surface3);
+  color: var(--text);
+  transform: translate(-1px,-2px);
+  box-shadow: 4px 5px 0px rgba(0,0,0,0.25);
+}
 
 .btn-ghost.active {
-  background: rgba(251,191,36,0.1);
-  border-color: rgba(251,191,36,0.4);
+  background: rgba(251,191,36,0.2);
+  border-color: rgba(251,191,36,0.6);
   color: var(--yellow);
-  box-shadow: 0 0 18px rgba(251,191,36,0.12);
+  box-shadow: 3px 3px 0px rgba(251,191,36,0.3);
 }
 
 .btn-primary {
   background: linear-gradient(135deg, #7c3aed 0%, #2563eb 100%);
   color: #fff;
-  box-shadow: 0 3px 14px rgba(124,58,237,0.3);
+  border-color: rgba(0,0,0,0.2);
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.35);
 }
-.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(124,58,237,0.45); }
+.btn-primary:hover {
+  transform: translate(-2px,-3px);
+  box-shadow: 6px 7px 0px rgba(0,0,0,0.4);
+}
 
 /* ══════════════════════════════════════════════════════════
    EDIT BANNER
@@ -600,12 +645,16 @@ body.edit-mode #edit-banner { display: block; }
   padding: 8px 16px;
   border-radius: 99px;
   font-size: 0.88rem;
-  font-weight: 700;
-  border: 1.5px solid;
-  transition: box-shadow 0.3s;
+  font-weight: 800;
+  border: 2.5px solid;
+  transition: box-shadow 0.3s, transform 0.2s;
   position: relative;
   overflow: hidden;
+  box-shadow: var(--shadow-cartoon);
+  letter-spacing: 0.2px;
 }
+
+.category-box:hover { transform: translate(-1px,-2px); }
 
 .category-box::before {
   content: '';
@@ -692,31 +741,25 @@ body.edit-mode .delete-category-btn { display: inline-flex; }
 /* ── COPY BOX ── */
 .copy-box {
   position: relative;
-  background: var(--surface);
-  border: 1.5px solid var(--border2);
-  border-radius: 16px;
+  background: var(--surface2);
+  border: 2.5px solid var(--border2);
+  border-radius: 18px;
   padding: 13px 14px 20px;
   min-width: 155px;
   max-width: 290px;
   cursor: pointer;
-  transition: transform 0.28s cubic-bezier(0.34,1.4,0.64,1),
-              box-shadow 0.28s ease,
-              background 0.18s,
-              border-color 0.18s;
+  transition: transform 0.22s cubic-bezier(0.34,1.5,0.64,1), box-shadow 0.22s ease;
   animation: boxIn 0.35s cubic-bezier(0.34,1.5,0.64,1) both;
   user-select: none;
   overflow: hidden;
-  /* Cartoon: subtle top shine */
-  background-image: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%);
+  box-shadow: var(--shadow-cartoon);
 }
 
 .copy-box::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 50%);
-  opacity: 0;
-  transition: opacity 0.2s;
+  background: linear-gradient(160deg, rgba(255,255,255,0.07) 0%, transparent 50%);
   pointer-events: none;
   border-radius: inherit;
 }
@@ -729,10 +772,9 @@ body.edit-mode .delete-category-btn { display: inline-flex; }
 }
 
 .copy-box:hover {
-  transform: translateY(-5px) scale(1.015);
-  background: var(--surface2);
-  box-shadow: 0 16px 36px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.09);
-  border-color: var(--border2);
+  transform: translate(-2px, -4px);
+  box-shadow: var(--shadow-cartoon-hover);
+  border-color: var(--purple);
 }
 
 body.edit-mode .copy-box { cursor: default; user-select: text; }
@@ -2460,6 +2502,103 @@ body.edit-mode .add-copybox-btn { display: flex; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.13); }
 
 /* ══════════════════════════════════════════════════════════
+   SETTINGS PANEL
+══════════════════════════════════════════════════════════ */
+#settings-panel {
+  position: fixed;
+  top: 0; right: 0;
+  width: 300px;
+  height: 100vh;
+  background: var(--bg2, #0d0d16);
+  border-left: 2px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  z-index: 600;
+  transform: translateX(100%);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1), background 0.4s;
+  box-shadow: -4px 0 24px rgba(0,0,0,0.3);
+}
+#settings-panel.open { transform: translateX(0); }
+
+.settings-header {
+  padding: 16px 18px;
+  border-bottom: 2px solid var(--border2);
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.settings-title {
+  flex:1; font-size:0.92rem; font-weight:800;
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.settings-close {
+  width:28px; height:28px; border-radius:8px;
+  background:var(--surface2); border:1.5px solid var(--border2);
+  color:var(--text2); cursor:pointer; font-size:0.85rem;
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.15s; font-family:inherit;
+}
+.settings-close:hover { background:var(--surface3); color:var(--text); }
+
+.settings-body { padding: 20px 18px; display:flex; flex-direction:column; gap:20px; flex:1; }
+
+.settings-section-title {
+  font-size:0.62rem; font-weight:800; letter-spacing:2px;
+  text-transform:uppercase; color:var(--text3); margin-bottom:10px;
+}
+
+/* Theme toggle */
+.theme-toggle-wrap {
+  display:flex; align-items:center; justify-content:space-between;
+  background: var(--surface2);
+  border: 2px solid var(--border2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow-cartoon);
+}
+.theme-toggle-info { display:flex; flex-direction:column; gap:2px; }
+.theme-toggle-label { font-size:0.83rem; font-weight:700; color:var(--text); }
+.theme-toggle-sub   { font-size:0.68rem; color:var(--text3); }
+
+/* Toggle switch cartoon style */
+.toggle-switch {
+  width: 52px; height: 28px;
+  background: var(--surface3);
+  border-radius: 99px;
+  border: 2px solid var(--border2);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
+  flex-shrink: 0;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.2);
+}
+.toggle-switch.on {
+  background: linear-gradient(135deg, #fbbf24, #f97316);
+  border-color: rgba(251,191,36,0.5);
+}
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  top: 2px; left: 2px;
+  transition: transform 0.3s cubic-bezier(0.34,1.5,0.64,1);
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+.toggle-switch.on::after { transform: translateX(24px); }
+
+/* Auto theme info */
+.auto-theme-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  background: rgba(251,191,36,0.1);
+  border: 1.5px solid rgba(251,191,36,0.3);
+  border-radius: 99px;
+  padding: 4px 10px;
+  font-size: 0.68rem; font-weight:700; color: var(--yellow);
+}
+
+/* ══════════════════════════════════════════════════════════
    MOBILE RESPONSIVE
 ══════════════════════════════════════════════════════════ */
 
@@ -2822,6 +2961,9 @@ body.is-mobile #ctrl-hint { display: none; }
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Categoría
     </button>
+    <button id="settings-btn" class="btn btn-ghost" title="Configuración">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </div>
 </header>
 
@@ -2997,6 +3139,40 @@ body.is-mobile #ctrl-hint { display: none; }
     <canvas id="radial-canvas"></canvas>
     <svg id="radial-hit"></svg>
     <div id="radial-knob">CTRL</div>
+  </div>
+</div>
+
+<!-- SETTINGS PANEL -->
+<div id="settings-panel">
+  <div class="settings-header">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    <span class="settings-title">Configuración</span>
+    <button class="settings-close" id="settings-close">✕</button>
+  </div>
+  <div class="settings-body">
+    <div>
+      <div class="settings-section-title">Apariencia</div>
+      <div class="theme-toggle-wrap">
+        <div class="theme-toggle-info">
+          <div class="theme-toggle-label" id="theme-label">🌙 Modo oscuro</div>
+          <div class="theme-toggle-sub" id="theme-sub">Auto: cambia según la hora del día</div>
+        </div>
+        <div class="toggle-switch" id="theme-toggle"></div>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+        <span class="auto-theme-badge" id="auto-badge">⏰ Auto activo</span>
+        <button id="auto-theme-btn" style="background:none;border:none;color:var(--text3);font-size:0.7rem;cursor:pointer;font-family:inherit;padding:4px 8px;border-radius:6px;transition:all 0.15s;">Desactivar auto</button>
+      </div>
+    </div>
+    <div>
+      <div class="settings-section-title">Acerca de</div>
+      <div style="background:var(--surface2);border:2px solid var(--border2);border-radius:14px;padding:12px 14px;font-size:0.78rem;color:var(--text3);line-height:1.7;box-shadow:var(--shadow-cartoon)">
+        <strong style="color:var(--text)">✦ CopyBox</strong> — Tu gestor de textos inteligente.<br>
+        Versión 2.0 · Open source en <a href="https://github.com/malwarexx/copybox" target="_blank" style="color:var(--purple)">GitHub</a><br>
+        <a href="privacy.html" target="_blank" style="color:var(--purple)">Privacidad</a> ·
+        <a href="terms.html"   target="_blank" style="color:var(--purple)">Términos</a>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -5532,6 +5708,80 @@ function initTutorial() {
   // Start
   showStep(0);
 }
+
+/* ══════════════════════════════════════════════════════════
+   SETTINGS + THEME
+══════════════════════════════════════════════════════════ */
+(function() {
+  const panel       = document.getElementById('settings-panel');
+  const closeBtn    = document.getElementById('settings-close');
+  const toggleBtn   = document.getElementById('theme-toggle');
+  const themeLabel  = document.getElementById('theme-label');
+  const themeSub    = document.getElementById('theme-sub');
+  const autoBadge   = document.getElementById('auto-badge');
+  const autoThemeBtn= document.getElementById('auto-theme-btn');
+
+  const THEME_KEY   = 'copybox_theme';   // 'dark' | 'light'
+  const AUTO_KEY    = 'copybox_theme_auto'; // 'true' | 'false'
+
+  let isLight   = false;
+  let isAuto    = localStorage.getItem(AUTO_KEY) !== 'false'; // default true
+
+  // Detect day (6:00–20:00) or night
+  function isDayTime() {
+    const h = new Date().getHours();
+    return h >= 6 && h < 20;
+  }
+
+  function applyTheme(light) {
+    isLight = light;
+    document.body.classList.toggle('light-mode', light);
+    toggleBtn.classList.toggle('on', light);
+    themeLabel.textContent = light ? '☀️ Modo claro' : '🌙 Modo oscuro';
+    if (!isAuto) localStorage.setItem(THEME_KEY, light ? 'light' : 'dark');
+  }
+
+  function updateAutoUI() {
+    autoBadge.style.display = isAuto ? 'inline-flex' : 'none';
+    autoThemeBtn.textContent = isAuto ? 'Desactivar auto' : 'Activar auto';
+    themeSub.textContent = isAuto
+      ? 'Auto: cambia según la hora del día'
+      : 'Manual: elegís el tema vos';
+  }
+
+  // Init theme
+  if (isAuto) {
+    applyTheme(isDayTime());
+    // Check every 5 min if time changed
+    setInterval(() => { if (isAuto) applyTheme(isDayTime()); }, 5 * 60 * 1000);
+  } else {
+    applyTheme(localStorage.getItem(THEME_KEY) === 'light');
+  }
+  updateAutoUI();
+
+  // Toggle button
+  toggleBtn.addEventListener('click', () => {
+    isAuto = false;
+    localStorage.setItem(AUTO_KEY, 'false');
+    applyTheme(!isLight);
+    updateAutoUI();
+    sfx('edit');
+  });
+
+  // Auto toggle
+  autoThemeBtn.addEventListener('click', () => {
+    isAuto = !isAuto;
+    localStorage.setItem(AUTO_KEY, String(isAuto));
+    if (isAuto) applyTheme(isDayTime());
+    updateAutoUI();
+    showToast(isAuto ? '⏰ Tema automático activado' : '🎨 Tema manual', 'purple');
+    sfx('edit');
+  });
+
+  // Open/close
+  document.getElementById('settings-btn').addEventListener('click', () => panel.classList.add('open'));
+  closeBtn.addEventListener('click', () => panel.classList.remove('open'));
+})();
 
 /* ══════════════════════════════════════════════════════════
    INIT
