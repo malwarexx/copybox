@@ -1660,7 +1660,6 @@ body.edit-mode .add-copybox-btn { display: flex; }
 }
 #ai-send-btn:hover { opacity: 0.85; transform: scale(1.05); }
 #ai-send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
 /* key reset link */
 .ai-key-reset {
   font-size: 0.68rem;
@@ -2453,6 +2452,136 @@ body.edit-mode .add-copybox-btn { display: flex; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.13); }
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE
+══════════════════════════════════════════════════════════ */
+
+/* Header scrollable on mobile */
+@media (max-width: 768px) {
+  :root { --header-h: 54px; }
+
+  header {
+    padding: 0 12px;
+    gap: 8px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-wrap: nowrap;
+  }
+  header::-webkit-scrollbar { display: none; }
+
+  .header-center { flex-shrink: 0; gap: 6px; }
+  header h1 { font-size: 1rem; }
+  #active-profile-label { display: none; }
+  .header-divider { display: none; }
+
+  .header-actions {
+    flex-shrink: 0;
+    gap: 5px;
+  }
+
+  .btn { padding: 6px 10px; font-size: 0.72rem; gap: 4px; }
+  .btn span:last-child { display: none; } /* hide text labels on small btns */
+
+  /* Keep labels on important buttons */
+  #add-category-btn span:last-child,
+  #edit-mode-btn #edit-btn-label { display: inline; }
+
+  #app { padding: 16px; gap: 28px; }
+
+  .copy-box { min-width: 130px; max-width: 100%; }
+  .copyboxes-grid { gap: 8px; }
+
+  /* Sidebar full width on mobile */
+  #sidebar { width: 100vw; }
+
+  /* Panels full screen on mobile */
+  #ai-panel, #clients-panel { width: 100vw; }
+
+  /* Modals full screen */
+  #paste-modal, #mass-modal { width: 100vw; border-radius: 16px 16px 0 0; max-height: 92vh; position: fixed; bottom: 0; top: auto; }
+  #paste-modal-overlay, #mass-modal-overlay { align-items: flex-end; }
+
+  /* Hide ctrl hint */
+  #ctrl-hint { display: none; }
+
+  /* Copy box bigger tap target */
+  .copy-box { padding: 14px; }
+
+  /* Category chips */
+  .category-box { padding: 7px 12px; }
+}
+
+/* ── MOBILE RADIAL JOYSTICK ── */
+#mobile-radial-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  background: rgba(0,0,0,0.55);
+  align-items: center;
+  justify-content: center;
+}
+#mobile-radial-overlay.active { display: flex; }
+
+#mobile-radial-wrap {
+  position: relative;
+  width: 280px;
+  height: 280px;
+}
+
+#mobile-radial-canvas {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+#mobile-joystick-knob {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a2070, #0d0920);
+  border: 2px solid rgba(155,111,255,0.7);
+  box-shadow: 0 0 24px rgba(155,111,255,0.5);
+  transform: translate(-50%, -50%);
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 800;
+  color: #c4b5fd;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: transform 0.1s ease;
+  user-select: none;
+}
+
+#mobile-radial-hint {
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.35);
+  white-space: nowrap;
+}
+
+/* Two-finger trigger area for radial — invisible overlay */
+#touch-radial-trigger {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 8500;
+  pointer-events: none;
+}
+body.is-mobile #touch-radial-trigger { display: block; }
+body.is-mobile #ctrl-hint { display: none; }
 </style>
 </head>
 <body>
@@ -2823,6 +2952,16 @@ body.edit-mode .add-copybox-btn { display: flex; }
     <div id="radial-knob">CTRL</div>
   </div>
 </div>
+
+<!-- MOBILE RADIAL -->
+<div id="mobile-radial-overlay">
+  <div id="mobile-radial-wrap">
+    <canvas id="mobile-radial-canvas" width="280" height="280"></canvas>
+    <div id="mobile-joystick-knob">MOVER</div>
+    <div id="mobile-radial-hint">Arrastrá hacia una categoría</div>
+  </div>
+</div>
+<div id="touch-radial-trigger"></div>
 
 <script>
 /* ══════════════════════════════════════════════════════════
@@ -4966,6 +5105,182 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
   // Init display
   results.style.display = 'flex';
 })();
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE DETECTION & TOUCH RADIAL
+══════════════════════════════════════════════════════════ */
+const isMobile = /Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent)
+  || (navigator.maxTouchPoints > 1 && window.innerWidth <= 900);
+
+if (isMobile) document.body.classList.add('is-mobile');
+
+// ── Mobile two-finger radial joystick ──
+if (isMobile) {
+  const mOverlay  = document.getElementById('mobile-radial-overlay');
+  const mCanvas   = document.getElementById('mobile-radial-canvas');
+  const mKnob     = document.getElementById('mobile-joystick-knob');
+  const mCtx      = mCanvas.getContext('2d');
+  const WRAP_SIZE = 280;
+  const CENTER    = WRAP_SIZE / 2;
+  const INNER_R   = 44;
+  const OUTER_R   = 128;
+  const KNOB_MAX  = OUTER_R - INNER_R;
+
+  let mOpen        = false;
+  let mActive      = -1;  // hovered segment index
+  let mCats        = [];
+  let mSegs        = [];
+  let mFirstTouch  = null; // first finger position
+
+  // Two-finger detection
+  document.addEventListener('touchstart', e => {
+    if (e.touches.length === 2 && !mOpen) {
+      e.preventDefault();
+      mFirstTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      openMobileRadial();
+    }
+  }, { passive: false });
+
+  document.addEventListener('touchend', e => {
+    if (mOpen && e.touches.length === 0) {
+      // All fingers lifted — select if hovering
+      if (mActive >= 0 && mCats[mActive]) {
+        sfx('copy');
+        scrollToCat(mCats[mActive].id);
+      }
+      closeMobileRadial();
+    }
+  });
+
+  document.addEventListener('touchmove', e => {
+    if (!mOpen || e.touches.length < 1) return;
+    e.preventDefault();
+    // Use second finger (index 1) as joystick if 2 fingers, else first
+    const t = e.touches.length >= 2 ? e.touches[1] : e.touches[0];
+    const rect = mCanvas.getBoundingClientRect();
+    const dx = t.clientX - (rect.left + CENTER);
+    const dy = t.clientY - (rect.top  + CENTER);
+    const dist = Math.sqrt(dx*dx + dy*dy);
+
+    // Move knob
+    const clampDist = Math.min(dist, KNOB_MAX);
+    const angle = Math.atan2(dy, dx);
+    const kx = CENTER + Math.cos(angle)*clampDist;
+    const ky = CENTER + Math.sin(angle)*clampDist;
+    mKnob.style.left = kx + 'px';
+    mKnob.style.top  = ky + 'px';
+
+    // Determine hovered segment
+    if (dist > INNER_R * 0.6) {
+      const n = mCats.length;
+      const normAngle = ((angle + Math.PI*2) % (Math.PI*2));
+      const startOff  = -Math.PI/2 + Math.PI*2;
+      let idx = Math.floor(((normAngle - (-Math.PI/2) + Math.PI*2) % (Math.PI*2)) / (Math.PI*2/n));
+      idx = ((idx % n) + n) % n;
+      if (idx !== mActive) {
+        mActive = idx;
+        drawMobileWheel(idx);
+        sfx('edit');
+      }
+    } else {
+      if (mActive !== -1) { mActive = -1; drawMobileWheel(-1); }
+    }
+  }, { passive: false });
+
+  function openMobileRadial() {
+    const prof = activeProfile();
+    if (!prof || !(prof.categories||[]).length) return;
+    mCats  = prof.categories;
+    mOpen  = true;
+    mActive = -1;
+    const n = mCats.length;
+    const GAP = 0.03;
+    const angleStep = (2*Math.PI)/n;
+    const startOff  = -Math.PI/2;
+    mSegs = mCats.map((_,i) => ({
+      aStart: startOff + i*angleStep + GAP,
+      aEnd:   startOff + (i+1)*angleStep - GAP,
+      mid:    startOff + (i+0.5)*angleStep,
+    }));
+    mKnob.style.left = CENTER+'px';
+    mKnob.style.top  = CENTER+'px';
+    drawMobileWheel(-1);
+    mOverlay.classList.add('active');
+    sfx('radial');
+    bgPaused = true;
+  }
+
+  function closeMobileRadial() {
+    mOpen = false; mActive = -1;
+    mOverlay.classList.remove('active');
+    mCtx.clearRect(0,0,WRAP_SIZE,WRAP_SIZE);
+    bgPaused = false;
+  }
+
+  mOverlay.addEventListener('touchstart', e => {
+    if (e.target === mOverlay) closeMobileRadial();
+  });
+
+  function drawMobileWheel(hovIdx) {
+    mCtx.clearRect(0,0,WRAP_SIZE,WRAP_SIZE);
+    const n = mCats.length;
+    for (let i=0; i<n; i++) {
+      const cat = mCats[i];
+      const {aStart,aEnd,mid} = mSegs[i];
+      const r = parseInt(cat.color.slice(1,3),16);
+      const g = parseInt(cat.color.slice(3,5),16);
+      const b = parseInt(cat.color.slice(5,7),16);
+      const hov = i===hovIdx;
+
+      const grad = mCtx.createLinearGradient(
+        CENTER+Math.cos(mid)*INNER_R, CENTER+Math.sin(mid)*INNER_R,
+        CENTER+Math.cos(mid)*OUTER_R, CENTER+Math.sin(mid)*OUTER_R
+      );
+      if (hov) {
+        grad.addColorStop(0,  `rgba(${r},${g},${b},0.55)`);
+        grad.addColorStop(1,  `rgba(${r},${g},${b},0.95)`);
+      } else {
+        grad.addColorStop(0,  `rgba(18,12,48,0.92)`);
+        grad.addColorStop(1,  `rgba(${Math.floor(r*0.55+8)},${Math.floor(g*0.35+6)},${Math.floor(b*0.65+20)},0.9)`);
+      }
+
+      mCtx.beginPath();
+      mCtx.moveTo(CENTER+Math.cos(aStart)*INNER_R, CENTER+Math.sin(aStart)*INNER_R);
+      mCtx.arc(CENTER,CENTER,OUTER_R,aStart,aEnd);
+      mCtx.arc(CENTER,CENTER,INNER_R,aEnd,aStart,true);
+      mCtx.closePath();
+      mCtx.fillStyle = grad; mCtx.fill();
+      mCtx.strokeStyle = hov ? `rgba(${r},${g},${b},0.9)` : `rgba(${r},${g},${b},0.3)`;
+      mCtx.lineWidth = hov ? 2 : 0.8;
+      mCtx.stroke();
+
+      // Label
+      const tx = CENTER+Math.cos(mid)*(INNER_R+(OUTER_R-INNER_R)*0.55);
+      const ty = CENTER+Math.sin(mid)*(INNER_R+(OUTER_R-INNER_R)*0.55);
+      mCtx.save();
+      mCtx.translate(tx,ty);
+      mCtx.fillStyle    = hov ? '#fff' : `rgba(${Math.min(r+160,255)},${Math.min(g+160,255)},${Math.min(b+180,255)},0.9)`;
+      mCtx.font         = `${hov?'700':'600'} ${hov?'12px':'10px'} Inter,sans-serif`;
+      mCtx.textAlign    = 'center';
+      mCtx.textBaseline = 'middle';
+      mCtx.shadowColor  = 'rgba(0,0,0,0.9)'; mCtx.shadowBlur = 4;
+      const label = cat.title||'Cat '+(i+1);
+      const words = label.split(' ');
+      if (words.length>1 && mCtx.measureText(label).width>52) {
+        const h=Math.ceil(words.length/2);
+        mCtx.fillText(words.slice(0,h).join(' '),0,-6);
+        mCtx.fillText(words.slice(h).join(' '),0,6);
+      } else { mCtx.fillText(label,0,0); }
+      mCtx.restore();
+    }
+    // Center
+    const cg=mCtx.createRadialGradient(CENTER-4,CENTER-6,2,CENTER,CENTER,INNER_R-2);
+    cg.addColorStop(0,'#2a1860'); cg.addColorStop(1,'#0d0920');
+    mCtx.beginPath(); mCtx.arc(CENTER,CENTER,INNER_R-1,0,Math.PI*2);
+    mCtx.fillStyle=cg; mCtx.fill();
+    mCtx.strokeStyle='rgba(155,111,255,0.45)'; mCtx.lineWidth=1.5; mCtx.stroke();
+  }
+}
 
 /* ══════════════════════════════════════════════════════════
    TOUR INTERACTIVO — spotlight on each UI element
