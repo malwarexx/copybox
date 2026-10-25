@@ -2501,6 +2501,63 @@ body.edit-mode .add-copybox-btn { display: flex; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.13); }
 
+/* ══════════════════════════════════════════════════════════
+   DESIGN PANEL (fullscreen slide-up)
+══════════════════════════════════════════════════════════ */
+#design-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 700;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+#design-panel.open { transform: translateY(0); }
+
+#design-panel-topbar {
+  height: 48px;
+  background: rgba(9,9,15,0.95);
+  border-bottom: 1px solid var(--border2);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
+}
+
+#design-panel-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f472b6, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#design-panel-close {
+  margin-left: auto;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border2);
+  color: var(--text2);
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+#design-panel-close:hover { background: var(--surface3); color: var(--text); }
+
+#design-iframe {
+  flex: 1;
+  border: none;
+  width: 100%;
+}
+
 /* Google profile avatar in header */
 #header-google-avatar-btn {
   width: 36px; height: 36px;
@@ -3023,10 +3080,10 @@ body.is-mobile #ctrl-hint { display: none; }
     </button>
 
     <!-- Design editor -->
-    <a href="design.html" target="_blank" class="btn btn-ghost" title="Editor de diseño" style="background:rgba(244,114,182,0.1);border-color:rgba(244,114,182,0.4);color:#f472b6;text-decoration:none;">
+    <button id="design-btn" class="btn btn-ghost" title="Editor de diseño" style="background:rgba(244,114,182,0.1);border-color:rgba(244,114,182,0.4);color:#f472b6;">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
       Diseño
-    </a>
+    </button>
 
     <!-- AI -->
     <button id="ai-chat-btn" class="btn btn-ghost" title="IA" style="background:rgba(155,111,255,0.1);border-color:rgba(155,111,255,0.4);color:#c4b5fd;">
@@ -3219,6 +3276,16 @@ body.is-mobile #ctrl-hint { display: none; }
     <svg id="radial-hit"></svg>
     <div id="radial-knob">CTRL</div>
   </div>
+</div>
+
+<!-- DESIGN PANEL -->
+<div id="design-panel">
+  <div id="design-panel-topbar">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="#f472b6"/><circle cx="17.5" cy="10.5" r=".5" fill="#f472b6"/><circle cx="8.5" cy="7.5" r=".5" fill="#f472b6"/><circle cx="6.5" cy="12.5" r=".5" fill="#f472b6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+    <span id="design-panel-title">✦ Diseño gráfico</span>
+    <button id="design-panel-close">✕</button>
+  </div>
+  <iframe id="design-iframe" src="design.html" title="Editor de diseño gráfico"></iframe>
 </div>
 
 <!-- SETTINGS PANEL -->
@@ -5815,6 +5882,25 @@ function initTutorial() {
   // Start
   showStep(0);
 }
+
+/* ══════════════════════════════════════════════════════════
+   DESIGN PANEL
+══════════════════════════════════════════════════════════ */
+(function() {
+  const panel = document.getElementById('design-panel');
+  document.getElementById('design-btn').addEventListener('click', () => {
+    panel.classList.add('open');
+    sfx('edit');
+  });
+  document.getElementById('design-panel-close').addEventListener('click', () => {
+    panel.classList.remove('open');
+    sfx('edit');
+  });
+  // Escape key closes it
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && panel.classList.contains('open')) panel.classList.remove('open');
+  });
+})();
 
 /* ══════════════════════════════════════════════════════════
    SETTINGS + THEME
