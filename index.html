@@ -2501,6 +2501,33 @@ body.edit-mode .add-copybox-btn { display: flex; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.13); }
 
+/* Google profile avatar in header */
+#header-google-avatar-btn {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2.5px solid rgba(155,111,255,0.5);
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 3px 3px 0px rgba(0,0,0,0.3);
+  padding: 0;
+}
+#header-google-avatar-btn:hover {
+  transform: translate(-1px,-2px);
+  box-shadow: 4px 5px 0px rgba(0,0,0,0.35);
+  border-color: rgba(155,111,255,0.8);
+}
+#header-google-avatar-btn img {
+  width: 100%; height: 100%;
+  object-fit: cover; border-radius: 50%;
+}
+#header-google-avatar-btn .avatar-placeholder {
+  font-size: 1rem; color: var(--text3);
+}
+
 /* ── Light mode UI overrides ── */
 body.light-mode header {
   background: rgba(255,255,255,0.85);
@@ -2890,54 +2917,53 @@ body.is-mobile #ctrl-hint { display: none; }
 
 <!-- HEADER -->
 <header>
-  <button id="menu-btn" title="Perfiles">
+  <!-- Hamburger — cartoon style -->
+  <button id="menu-btn" title="Perfiles" style="border-radius:12px;border:2px solid var(--border2);box-shadow:3px 3px 0 rgba(0,0,0,0.3);">
     <div class="bar"></div>
     <div class="bar"></div>
     <div class="bar"></div>
   </button>
+
   <div class="header-center">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter:drop-shadow(0 0 6px rgba(167,139,250,0.6));flex-shrink:0"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
+    <!-- Cartoon star logo -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="#a78bfa" style="filter:drop-shadow(2px 2px 0 rgba(109,40,217,0.5));flex-shrink:0"><path d="m12 2 2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg>
     <h1>CopyBox</h1>
     <div class="header-divider"></div>
     <span id="active-profile-label">—</span>
   </div>
+
   <div class="header-actions">
+    <!-- Translate -->
     <div id="translate-wrap">
-      <button id="translate-btn" class="btn btn-ghost" title="Traducir textos">
+      <button id="translate-btn" class="btn btn-ghost" title="Traducir">
         <span class="lang-flag">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
         </span>
         <span id="translate-label">Traducir</span>
       </button>
       <div id="lang-dropdown">
-        <button class="lang-option" data-lang="es">
-          <span class="flag">🇪🇸</span>
-          <span class="lang-name">Español</span>
-          <span class="lang-check">✓</span>
-        </button>
-        <button class="lang-option" data-lang="en">
-          <span class="flag">🇺🇸</span>
-          <span class="lang-name">Inglés</span>
-          <span class="lang-check">✓</span>
-        </button>
-        <button class="lang-option" data-lang="pt">
-          <span class="flag">🇧🇷</span>
-          <span class="lang-name">Portugués</span>
-          <span class="lang-check">✓</span>
-        </button>
+        <button class="lang-option" data-lang="es"><span class="flag">🇪🇸</span><span class="lang-name">Español</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="en"><span class="flag">🇺🇸</span><span class="lang-name">Inglés</span><span class="lang-check">✓</span></button>
+        <button class="lang-option" data-lang="pt"><span class="flag">🇧🇷</span><span class="lang-name">Portugués</span><span class="lang-check">✓</span></button>
       </div>
     </div>
+
+    <!-- Edit -->
     <button id="edit-mode-btn" class="btn btn-ghost">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
       <span id="edit-btn-label">Editar</span>
     </button>
-    <button id="paste-import-btn" class="btn btn-ghost" title="Pegar contenido masivo">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+
+    <!-- Paste -->
+    <button id="paste-import-btn" class="btn btn-ghost" title="Pegar contenido">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11v6"/><path d="M9 14h6"/></svg>
       Pegar
     </button>
+
+    <!-- Data / Drive -->
     <div id="data-menu-wrap">
-      <button id="data-menu-btn" class="btn btn-ghost" title="Datos y cuenta">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
+      <button id="data-menu-btn" class="btn btn-ghost" title="Datos">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>
         <span id="data-menu-label-text">Datos</span>
       </button>
       <div id="data-dropdown">
@@ -2950,86 +2976,71 @@ body.is-mobile #ctrl-hint { display: none; }
         </div>
         <div class="data-menu-section" id="google-signin-section">
           <div style="padding:10px 12px 6px;">
-            <button id="google-signin-btn" style="
-              width:100%;
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              gap:10px;
-              padding:10px 16px;
-              background:#fff;
-              border:none;
-              border-radius:8px;
-              cursor:pointer;
-              font-size:0.83rem;
-              font-weight:600;
-              color:#3c4043;
-              font-family:'Inter','Segoe UI',sans-serif;
-              box-shadow:0 1px 3px rgba(0,0,0,0.25),0 0 0 1px rgba(0,0,0,0.08);
-              transition:box-shadow 0.15s,background 0.15s;
-            "
-            onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.3),0 0 0 1px rgba(0,0,0,0.12)';this.style.background='#f8f8f8'"
-            onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,0.25),0 0 0 1px rgba(0,0,0,0.08)';this.style.background='#fff'"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-              </svg>
+            <button id="google-signin-btn" style="width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 16px;background:#fff;border:none;border-radius:8px;cursor:pointer;font-size:0.83rem;font-weight:600;color:#3c4043;font-family:'Inter','Segoe UI',sans-serif;box-shadow:0 1px 3px rgba(0,0,0,0.25),0 0 0 1px rgba(0,0,0,0.08);transition:box-shadow 0.15s,background 0.15s;" onmouseover="this.style.boxShadow='0 2px 8px rgba(0,0,0,0.3),0 0 0 1px rgba(0,0,0,0.12)';this.style.background='#f8f8f8'" onmouseout="this.style.boxShadow='0 1px 3px rgba(0,0,0,0.25),0 0 0 1px rgba(0,0,0,0.08)';this.style.background='#fff'">
+              <svg width="18" height="18" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
               Continuar con Google
             </button>
-            <div style="font-size:0.65rem;color:rgba(255,255,255,0.25);text-align:center;margin-top:7px;line-height:1.4;">
-              Sincroniza tus datos en todos tus dispositivos
-            </div>
+            <div style="font-size:0.65rem;color:rgba(255,255,255,0.25);text-align:center;margin-top:7px;line-height:1.4;">Sincroniza tus datos en todos tus dispositivos</div>
           </div>
         </div>
         <div class="data-menu-section" id="google-signed-section">
           <button class="data-menu-item" id="google-sync-btn" style="display:none">
-            <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
-            Sincronizar
+            <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>Sincronizar
           </button>
           <button class="data-menu-item danger" id="google-signout-btn" style="display:none">
-            <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Cerrar sesión
+            <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Cerrar sesión
           </button>
         </div>
         <div class="data-menu-section">
           <div class="data-menu-label">Local</div>
           <button class="data-menu-item" id="export-json-btn">
-            <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Exportar JSON
+            <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Exportar JSON
           </button>
           <button class="data-menu-item" id="import-json-btn">
-            <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Importar JSON
+            <svg class="item-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Importar JSON
           </button>
         </div>
       </div>
     </div>
     <input type="file" id="json-import-input" accept=".json">
-    <button id="ai-chat-btn" class="btn btn-ghost" title="IA Chatbox" style="background:rgba(155,111,255,0.08);border-color:rgba(155,111,255,0.3);color:#c4b5fd;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275Z"/></svg>
-      IA
-    </button>
-    <button id="clients-btn" class="btn btn-ghost" title="Clientes" style="background:rgba(52,211,153,0.08);border-color:rgba(52,211,153,0.3);color:#34d399;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+
+    <!-- Clients -->
+    <button id="clients-btn" class="btn btn-ghost" title="Clientes" style="background:rgba(52,211,153,0.1);border-color:rgba(52,211,153,0.4);color:#34d399;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       Clientes
     </button>
-    <button id="mass-msg-btn" class="btn btn-ghost" title="Mensajes masivos" style="background:rgba(251,191,36,0.08);border-color:rgba(251,191,36,0.3);color:#fbbf24;">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+
+    <!-- Mass messages -->
+    <button id="mass-msg-btn" class="btn btn-ghost" title="Mensajes masivos" style="background:rgba(251,191,36,0.1);border-color:rgba(251,191,36,0.4);color:#fbbf24;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Mensajes
     </button>
+
+    <!-- AI -->
+    <button id="ai-chat-btn" class="btn btn-ghost" title="IA" style="background:rgba(155,111,255,0.1);border-color:rgba(155,111,255,0.4);color:#c4b5fd;">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="#c4b5fd"><path d="m12 2 2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6Z"/></svg>
+      IA
+    </button>
+
+    <!-- Add category -->
     <button id="add-category-btn" class="btn btn-primary">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Categoría
     </button>
+
+    <!-- Settings -->
     <button id="settings-btn" class="btn btn-ghost" title="Configuración">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+
+    <!-- Google profile avatar (top right) — shown when signed in -->
+    <button id="header-google-avatar-btn" title="Mi cuenta Google">
+      <span class="avatar-placeholder">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </span>
     </button>
   </div>
 </header>
-
 <div id="edit-banner">
   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-right:5px"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
   Modo edición — edita, agrega y elimina libremente
@@ -4909,6 +4920,9 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
   const gUserEmail    = document.getElementById('google-user-email');
 
   dataMenuBtn.addEventListener('click', e => { e.stopPropagation(); dataDropdown.classList.toggle('open'); });
+  // Header avatar also opens data dropdown
+  const headerAvBtn = document.getElementById('header-google-avatar-btn');
+  if (headerAvBtn) headerAvBtn.addEventListener('click', e => { e.stopPropagation(); dataDropdown.classList.toggle('open'); });
   document.addEventListener('click', () => dataDropdown.classList.remove('open'));
 
   // ── EXPORT ──
@@ -4990,6 +5004,12 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
   function showGUser(u) {
     gUserInfo.classList.add('visible');
     gAvatar.src = u.picture || ''; gUserName.textContent = u.name || ''; gUserEmail.textContent = u.email || '';
+    // Update header avatar
+    const headerAvBtn = document.getElementById('header-google-avatar-btn');
+    if (headerAvBtn && u.picture) {
+      headerAvBtn.innerHTML = `<img src="${u.picture}" alt="${u.name}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+      headerAvBtn.title = u.name;
+    }
     gSigninBtn.style.display = 'none'; gSyncBtn.style.display = 'flex'; gSignoutBtn.style.display = 'flex';
     document.getElementById('google-signin-section').style.display = 'none';
     document.getElementById('google-signed-section').style.display = 'block';
