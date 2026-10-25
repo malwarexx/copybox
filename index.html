@@ -2501,6 +2501,69 @@ body.edit-mode .add-copybox-btn { display: flex; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.13); }
 
+/* ── Light mode UI overrides ── */
+body.light-mode header {
+  background: rgba(255,255,255,0.85);
+  border-bottom-color: rgba(0,0,0,0.1);
+}
+
+body.light-mode #sidebar,
+body.light-mode #ai-panel,
+body.light-mode #clients-panel,
+body.light-mode #settings-panel {
+  background: rgba(255,255,255,0.97);
+  border-color: rgba(0,0,0,0.1);
+}
+
+body.light-mode .copy-box {
+  background: #fff;
+  border-color: rgba(0,0,0,0.12);
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.12);
+}
+body.light-mode .copy-box:hover {
+  box-shadow: 6px 6px 0px rgba(0,0,0,0.16);
+  border-color: var(--purple);
+}
+
+body.light-mode .btn-ghost {
+  background: rgba(255,255,255,0.9);
+  border-color: rgba(0,0,0,0.12);
+  color: #1a1a2e;
+  box-shadow: 3px 3px 0px rgba(0,0,0,0.1);
+}
+body.light-mode .btn-ghost:hover {
+  background: #fff;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.14);
+}
+
+body.light-mode .category-section { background: transparent; }
+
+body.light-mode #edit-banner {
+  background: rgba(251,191,36,0.15);
+  border-color: rgba(251,191,36,0.3);
+}
+
+body.light-mode #toast { backdrop-filter: none; }
+
+body.light-mode .copy-box-textarea { color: #1a1a2e; }
+
+body.light-mode .sb-header,
+body.light-mode .ai-panel-header,
+body.light-mode .cp-header,
+body.light-mode .settings-header {
+  background: rgba(0,0,0,0.03);
+  border-color: rgba(0,0,0,0.08);
+}
+
+body.light-mode .profile-item:hover { background: rgba(0,0,0,0.04); }
+body.light-mode .profile-item.active { background: rgba(124,58,237,0.08); }
+
+body.light-mode #paste-modal,
+body.light-mode #mass-modal {
+  background: #fff;
+  border-color: rgba(0,0,0,0.1);
+}
+
 /* ══════════════════════════════════════════════════════════
    SETTINGS PANEL
 ══════════════════════════════════════════════════════════ */
@@ -3217,23 +3280,42 @@ let bgPaused = false;
   function draw(ts) {
     rafId = requestAnimationFrame(draw);
     if (bgPaused) return;
-    if (ts - last < 50) return; // ~20fps cap
+    if (ts - last < 50) return;
     last = ts;
-    ctx.fillStyle = '#07070d';
-    ctx.fillRect(0, 0, W, H);
-    for (const o of orbs) {
-      o.x += o.vx; o.y += o.vy;
-      if (o.x < -o.r) o.x = W+o.r;
-      if (o.x > W+o.r) o.x = -o.r;
-      if (o.y < -o.r) o.y = H+o.r;
-      if (o.y > H+o.r) o.y = -o.r;
-      const g = ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-      g.addColorStop(0,`rgba(${o.c},${o.a})`);
-      g.addColorStop(1,`rgba(${o.c},0)`);
-      ctx.fillStyle = g;
-      ctx.beginPath();
-      ctx.arc(o.x,o.y,o.r,0,Math.PI*2);
-      ctx.fill();
+
+    const lightMode = document.body.classList.contains('light-mode');
+
+    if (lightMode) {
+      // Light mode: warm pastel gradient bg + soft colored orbs
+      ctx.fillStyle = '#f0ece8';
+      ctx.fillRect(0, 0, W, H);
+      const lightOrbs = [[255,182,193],[147,197,253],[167,243,208],[253,230,138]];
+      for (let i=0; i<orbs.length; i++) {
+        const o = orbs[i];
+        o.x += o.vx; o.y += o.vy;
+        if (o.x < -o.r) o.x = W+o.r; if (o.x > W+o.r) o.x = -o.r;
+        if (o.y < -o.r) o.y = H+o.r; if (o.y > H+o.r) o.y = -o.r;
+        const c = lightOrbs[i];
+        const g = ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+        g.addColorStop(0,`rgba(${c},0.35)`);
+        g.addColorStop(1,`rgba(${c},0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fill();
+      }
+    } else {
+      // Dark mode: original dark orbs
+      ctx.fillStyle = '#07070d';
+      ctx.fillRect(0, 0, W, H);
+      for (const o of orbs) {
+        o.x += o.vx; o.y += o.vy;
+        if (o.x < -o.r) o.x = W+o.r; if (o.x > W+o.r) o.x = -o.r;
+        if (o.y < -o.r) o.y = H+o.r; if (o.y > H+o.r) o.y = -o.r;
+        const g = ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+        g.addColorStop(0,`rgba(${o.c},${o.a})`);
+        g.addColorStop(1,`rgba(${o.c},0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fill();
+      }
     }
   }
   draw(0);
@@ -5739,6 +5821,8 @@ function initTutorial() {
     toggleBtn.classList.toggle('on', light);
     themeLabel.textContent = light ? '☀️ Modo claro' : '🌙 Modo oscuro';
     if (!isAuto) localStorage.setItem(THEME_KEY, light ? 'light' : 'dark');
+    // Force canvas repaint on next frame
+    bgPaused = false;
   }
 
   function updateAutoUI() {
