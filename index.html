@@ -79,6 +79,8 @@ body {
   margin-bottom: 24px;
   animation: spPulse 1.8s ease infinite;
   filter: drop-shadow(0 0 40px rgba(155,111,255,0.7));
+  /* Cartoon style: use a fun SVG illustration */
+  line-height: 1;
 }
 
 @keyframes spPulse {
@@ -287,15 +289,17 @@ body {
 .profile-item.active .profile-name { color: #c4b5fd; }
 
 .profile-avatar {
-  width: 36px; height: 36px;
-  border-radius: 10px;
+  width: 38px; height: 38px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.3rem;  /* show emoji bigger */
   flex-shrink: 0;
-  font-weight: 700;
   transition: transform 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  /* cartoon border */
+  border: 2px solid rgba(255,255,255,0.12);
 }
 
 .profile-item:hover .profile-avatar { transform: scale(1.08); }
@@ -689,8 +693,8 @@ body.edit-mode .delete-category-btn { display: inline-flex; }
 .copy-box {
   position: relative;
   background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1.5px solid var(--border2);
+  border-radius: 16px;
   padding: 13px 14px 20px;
   min-width: 155px;
   max-width: 290px;
@@ -702,6 +706,8 @@ body.edit-mode .delete-category-btn { display: inline-flex; }
   animation: boxIn 0.35s cubic-bezier(0.34,1.5,0.64,1) both;
   user-select: none;
   overflow: hidden;
+  /* Cartoon: subtle top shine */
+  background-image: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 40%);
 }
 
 .copy-box::before {
@@ -2462,56 +2468,73 @@ body.edit-mode .add-copybox-btn { display: flex; }
   :root { --header-h: 54px; }
 
   header {
-    padding: 0 12px;
-    gap: 8px;
+    padding: 0 8px;
+    gap: 4px;
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
     flex-wrap: nowrap;
+    justify-content: flex-start;
   }
   header::-webkit-scrollbar { display: none; }
 
-  .header-center { flex-shrink: 0; gap: 6px; }
-  header h1 { font-size: 1rem; }
-  #active-profile-label { display: none; }
-  .header-divider { display: none; }
+  /* Hide logo/title on mobile — save space */
+  .header-center { display: none; }
 
+  /* Buttons row scrolls horizontally */
   .header-actions {
     flex-shrink: 0;
-    gap: 5px;
+    gap: 4px;
+    display: flex;
+    align-items: center;
   }
 
-  .btn { padding: 6px 10px; font-size: 0.72rem; gap: 4px; }
-  .btn span:last-child { display: none; } /* hide text labels on small btns */
+  #menu-btn { flex-shrink: 0; margin-right: 2px; }
 
-  /* Keep labels on important buttons */
-  #add-category-btn span:last-child,
-  #edit-mode-btn #edit-btn-label { display: inline; }
+  /* Smaller buttons */
+  .btn {
+    padding: 7px 10px;
+    font-size: 0.73rem;
+    gap: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 
-  #app { padding: 16px; gap: 28px; }
+  /* Hide text on most buttons, keep icon only */
+  #translate-btn #translate-label,
+  #edit-btn-label,
+  #cp-load-label { display: none; }
+
+  /* Keep text on key buttons */
+  #add-category-btn,
+  #clients-btn,
+  #mass-msg-btn { font-size: 0.7rem; }
+
+  #app { padding: 14px; gap: 24px; }
 
   .copy-box { min-width: 130px; max-width: 100%; }
   .copyboxes-grid { gap: 8px; }
 
-  /* Sidebar full width on mobile */
   #sidebar { width: 100vw; }
-
-  /* Panels full screen on mobile */
   #ai-panel, #clients-panel { width: 100vw; }
 
-  /* Modals full screen */
-  #paste-modal, #mass-modal { width: 100vw; border-radius: 16px 16px 0 0; max-height: 92vh; position: fixed; bottom: 0; top: auto; }
+  #paste-modal, #mass-modal {
+    width: 100vw;
+    border-radius: 16px 16px 0 0;
+    max-height: 92vh;
+    position: fixed;
+    bottom: 0; top: auto;
+  }
   #paste-modal-overlay, #mass-modal-overlay { align-items: flex-end; }
 
-  /* Hide ctrl hint */
   #ctrl-hint { display: none; }
-
-  /* Copy box bigger tap target */
   .copy-box { padding: 14px; }
-
-  /* Category chips */
   .category-box { padding: 7px 12px; }
+
+  /* Translate dropdown */
+  #lang-dropdown { right: auto; left: 0; }
+  #data-dropdown { right: 0; min-width: 190px; }
 }
 
 /* ── MOBILE RADIAL JOYSTICK ── */
@@ -2617,7 +2640,22 @@ body.is-mobile #ctrl-hint { display: none; }
 
 <!-- SPLASH -->
 <div id="splash">
-  <div class="sp-icon">📋</div>
+  <div class="sp-icon">
+    <!-- Cartoon clipboard with stars -->
+    <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="18" y="14" width="64" height="76" rx="10" fill="#1e1040" stroke="#9b6fff" stroke-width="3"/>
+      <rect x="36" y="8" width="28" height="14" rx="7" fill="#9b6fff" stroke="#c4b5fd" stroke-width="2"/>
+      <rect x="28" y="36" width="44" height="5" rx="2.5" fill="#9b6fff" opacity="0.7"/>
+      <rect x="28" y="48" width="36" height="5" rx="2.5" fill="#60a5fa" opacity="0.7"/>
+      <rect x="28" y="60" width="40" height="5" rx="2.5" fill="#34d399" opacity="0.7"/>
+      <rect x="28" y="72" width="28" height="5" rx="2.5" fill="#f472b6" opacity="0.7"/>
+      <!-- Stars -->
+      <circle cx="82" cy="20" r="3" fill="#fbbf24"/>
+      <circle cx="14" cy="30" r="2" fill="#f472b6"/>
+      <circle cx="88" cy="72" r="2.5" fill="#60a5fa"/>
+      <path d="M76 38 L77.5 42 L82 42 L78.5 44.5 L80 49 L76 46.5 L72 49 L73.5 44.5 L70 42 L74.5 42 Z" fill="#fbbf24"/>
+    </svg>
+  </div>
   <div class="sp-title">CopyBox</div>
   <div class="sp-sub">Tu gestor de textos</div>
   <div class="sp-track"><div class="sp-bar"></div></div>
@@ -2816,7 +2854,16 @@ body.is-mobile #ctrl-hint { display: none; }
 
 <div id="app">
   <div id="empty-state">
-    <span class="empty-icon">📋</span>
+    <span class="empty-icon">
+      <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 16px">
+        <rect x="10" y="8" width="60" height="64" rx="10" fill="rgba(155,111,255,0.1)" stroke="rgba(155,111,255,0.35)" stroke-width="2.5" stroke-dasharray="5 3"/>
+        <rect x="28" y="2" width="24" height="12" rx="6" fill="rgba(155,111,255,0.3)" stroke="rgba(155,111,255,0.5)" stroke-width="1.5"/>
+        <circle cx="40" cy="42" r="14" fill="rgba(155,111,255,0.12)" stroke="rgba(155,111,255,0.3)" stroke-width="2"/>
+        <path d="M34 42 h12 M40 36 v12" stroke="rgba(155,111,255,0.6)" stroke-width="2.5" stroke-linecap="round"/>
+        <circle cx="62" cy="18" r="4" fill="rgba(251,191,36,0.4)" stroke="rgba(251,191,36,0.6)" stroke-width="1.5"/>
+        <circle cx="16" cy="60" r="3" fill="rgba(52,211,153,0.4)" stroke="rgba(52,211,153,0.6)" stroke-width="1.5"/>
+      </svg>
+    </span>
     <div class="empty-title">Sin categorías aún</div>
     <div class="empty-sub">Crea una categoría para empezar. Todo se guarda automáticamente.</div>
   </div>
