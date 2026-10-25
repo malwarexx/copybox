@@ -2552,11 +2552,140 @@ body.edit-mode .add-copybox-btn { display: flex; }
 }
 #design-panel-close:hover { background: var(--surface3); color: var(--text); }
 
-#design-iframe {
+/* Design editor inner layout */
+#design-editor-wrap {
   flex: 1;
-  border: none;
-  width: 100%;
+  display: flex;
+  overflow: hidden;
 }
+
+#design-left-panel {
+  width: 240px;
+  background: rgba(9,9,15,0.97);
+  border-right: 1px solid var(--border2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dp-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.dp-tab {
+  flex:1; padding:9px 4px; font-size:0.65rem; font-weight:700;
+  text-align:center; cursor:pointer; color:var(--text2);
+  border:none; background:none; font-family:inherit;
+  transition:all 0.15s; border-bottom:2px solid transparent;
+}
+.dp-tab.active { color:#f472b6; border-bottom-color:#f472b6; }
+.dp-tab:hover:not(.active) { color:var(--text); }
+
+.dp-panel { flex:1; overflow-y:auto; padding:10px; display:none; }
+.dp-panel.active { display:block; }
+.dp-panel::-webkit-scrollbar { width:3px; }
+.dp-panel::-webkit-scrollbar-thumb { background:rgba(255,255,255,0.08); border-radius:3px; }
+
+.dp-section { font-size:0.6rem; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin:10px 0 6px; }
+.dp-section:first-child { margin-top:0; }
+
+.dp-shape-grid { display:grid; grid-template-columns:1fr 1fr; gap:5px; }
+.dp-shape-btn {
+  padding:9px 6px; border-radius:8px; border:1.5px solid var(--border2);
+  background:var(--surface); color:var(--text2); cursor:pointer;
+  font-size:0.65rem; font-weight:600; font-family:inherit;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  transition:all 0.15s; box-shadow:2px 2px 0 rgba(0,0,0,0.25);
+}
+.dp-shape-btn:hover { background:rgba(255,255,255,0.08); color:var(--text); transform:translate(-1px,-1px); box-shadow:3px 3px 0 rgba(0,0,0,0.3); }
+.dp-text-btn {
+  width:100%; padding:9px 12px; border-radius:8px; border:1.5px solid var(--border2);
+  background:var(--surface); color:var(--text2); cursor:pointer;
+  font-size:0.72rem; font-weight:600; font-family:inherit;
+  display:flex; align-items:center; gap:8px; margin-bottom:5px;
+  transition:all 0.15s; box-shadow:2px 2px 0 rgba(0,0,0,0.25);
+}
+.dp-text-btn:hover { background:rgba(255,255,255,0.08); color:var(--text); transform:translate(-1px,-1px); }
+
+.dp-upload-area {
+  border:2px dashed rgba(244,114,182,0.3); border-radius:10px;
+  padding:16px; text-align:center; cursor:pointer;
+  transition:all 0.2s; color:var(--text2); font-size:0.72rem;
+}
+.dp-upload-area:hover { border-color:rgba(244,114,182,0.6); background:rgba(244,114,182,0.05); color:var(--text); }
+
+.dp-color-grid { display:grid; grid-template-columns:repeat(8,1fr); gap:3px; margin-bottom:8px; }
+.dp-swatch {
+  aspect-ratio:1; border-radius:4px; cursor:pointer;
+  border:2px solid rgba(255,255,255,0.08); transition:transform 0.1s;
+}
+.dp-swatch:hover { transform:scale(1.2); border-color:rgba(255,255,255,0.5); }
+
+.dp-prop-row { display:flex; align-items:center; gap:5px; margin-bottom:7px; }
+.dp-prop-label { font-size:0.65rem; color:var(--text2); min-width:38px; }
+.dp-prop-input {
+  flex:1; background:var(--surface); border:1px solid var(--border2);
+  border-radius:5px; color:var(--text); font-size:0.72rem;
+  font-family:inherit; padding:4px 7px; outline:none;
+}
+.dp-prop-input:focus { border-color:#f472b6; }
+
+.dp-btn-row { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px; }
+.dp-prop-btn {
+  padding:4px 9px; border-radius:5px; font-size:0.68rem; font-weight:600;
+  border:1.5px solid var(--border2); background:var(--surface); color:var(--text2);
+  cursor:pointer; font-family:inherit; transition:all 0.15s;
+}
+.dp-prop-btn:hover { background:rgba(255,255,255,0.08); color:var(--text); }
+.dp-prop-btn.active { background:rgba(244,114,182,0.15); border-color:rgba(244,114,182,0.5); color:#f472b6; }
+
+.dp-layer-item {
+  display:flex; align-items:center; gap:7px; padding:6px 8px;
+  border-radius:6px; cursor:pointer; font-size:0.7rem; color:var(--text2);
+  border:1px solid transparent; margin-bottom:2px; transition:all 0.15s;
+}
+.dp-layer-item:hover { background:var(--surface); color:var(--text); }
+.dp-layer-item.selected { background:rgba(244,114,182,0.1); border-color:rgba(244,114,182,0.3); color:#f472b6; }
+.dp-layer-del { margin-left:auto; background:none; border:none; color:var(--text3); cursor:pointer; font-size:0.75rem; opacity:0; transition:opacity 0.15s; }
+.dp-layer-item:hover .dp-layer-del { opacity:1; }
+.dp-layer-del:hover { color:#f87171; }
+
+/* Canvas area */
+#design-canvas-area {
+  flex:1; overflow:auto;
+  background:#1a1a2e;
+  background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 22px 22px;
+  display:flex; align-items:flex-start; justify-content:center;
+  padding:20px;
+  position: relative;
+}
+
+#design-canvas-wrap {
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 16px 48px rgba(0,0,0,0.6);
+  flex-shrink:0; position:relative;
+}
+
+/* Export / toolbar inside design panel */
+#design-inner-toolbar {
+  height:44px; background:rgba(9,9,15,0.9); border-top:1px solid var(--border2);
+  display:flex; align-items:center; padding:0 12px; gap:6px; flex-shrink:0;
+}
+
+.di-btn {
+  display:flex; align-items:center; gap:4px;
+  padding:5px 11px; border-radius:8px; border:1.5px solid var(--border2);
+  background:var(--surface); color:var(--text2); font-size:0.72rem; font-weight:600;
+  cursor:pointer; font-family:inherit; transition:all 0.15s;
+  box-shadow:2px 2px 0 rgba(0,0,0,0.25);
+}
+.di-btn:hover { background:rgba(255,255,255,0.08); color:var(--text); transform:translate(-1px,-1px); }
+.di-btn:active { transform:translate(1px,1px); }
+.di-btn.primary { background:linear-gradient(135deg,#7c3aed,#2563eb); border-color:transparent; color:#fff; box-shadow:3px 3px 0 rgba(0,0,0,0.4); }
+
+#design-canvas-size-btn { font-size:0.68rem; color:var(--text2); background:var(--surface); border:1px solid var(--border2); border-radius:6px; padding:4px 8px; cursor:pointer; }
 
 /* Google profile avatar in header */
 #header-google-avatar-btn {
@@ -3283,9 +3412,147 @@ body.is-mobile #ctrl-hint { display: none; }
   <div id="design-panel-topbar">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="#f472b6"/><circle cx="17.5" cy="10.5" r=".5" fill="#f472b6"/><circle cx="8.5" cy="7.5" r=".5" fill="#f472b6"/><circle cx="6.5" cy="12.5" r=".5" fill="#f472b6"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
     <span id="design-panel-title">✦ Diseño gráfico</span>
-    <button id="design-panel-close">✕</button>
+    <!-- inner toolbar -->
+    <span id="design-canvas-size-btn" style="margin-left:12px;">1080 × 1080</span>
+    <div style="flex:1"></div>
+    <button class="di-btn" onclick="dpUndo()">↩ Deshacer</button>
+    <button class="di-btn" onclick="dpRedo()">↪ Rehacer</button>
+    <button class="di-btn" onclick="dpDelete()">🗑</button>
+    <button class="di-btn" onclick="dpExportPNG()">⬇ PNG</button>
+    <button class="di-btn primary" onclick="dpExportJPG()">⬇ JPG</button>
+    <button id="design-panel-close" style="margin-left:8px;">✕</button>
   </div>
-  <iframe id="design-iframe" src="design.html" title="Editor de diseño gráfico"></iframe>
+
+  <div id="design-editor-wrap">
+    <!-- LEFT PANEL -->
+    <div id="design-left-panel">
+      <div class="dp-tabs">
+        <button class="dp-tab active" onclick="dpTab('add',this)">Añadir</button>
+        <button class="dp-tab" onclick="dpTab('props',this)">Props</button>
+        <button class="dp-tab" onclick="dpTab('layers',this)">Capas</button>
+      </div>
+
+      <!-- ADD -->
+      <div id="dp-tab-add" class="dp-panel active">
+        <div class="dp-section">Texto</div>
+        <button class="dp-text-btn" onclick="dpAddText('Título',48,true)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          Título grande
+        </button>
+        <button class="dp-text-btn" onclick="dpAddText('Subtítulo',26,false)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          Subtítulo
+        </button>
+        <button class="dp-text-btn" onclick="dpAddText('Tu texto aquí',16,false)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+          Texto normal
+        </button>
+
+        <div class="dp-section">Formas</div>
+        <div class="dp-shape-grid">
+          <button class="dp-shape-btn" onclick="dpAddRect()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+            Rect
+          </button>
+          <button class="dp-shape-btn" onclick="dpAddCircle()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+            Círculo
+          </button>
+          <button class="dp-shape-btn" onclick="dpAddTriangle()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 22h20z"/></svg>
+            Triángulo
+          </button>
+          <button class="dp-shape-btn" onclick="dpAddLine()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="12" x2="22" y2="12"/></svg>
+            Línea
+          </button>
+        </div>
+
+        <div class="dp-section">Imagen</div>
+        <div class="dp-upload-area" onclick="document.getElementById('dp-img-upload').click()">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 6px;display:block"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Subir imagen
+        </div>
+        <input type="file" id="dp-img-upload" accept="image/*" style="display:none" onchange="dpAddImage(event)">
+
+        <div class="dp-section">Fondo</div>
+        <div class="dp-color-grid" id="dp-bg-colors"></div>
+        <div class="dp-prop-row">
+          <div class="dp-prop-label">Color</div>
+          <input type="color" id="dp-bg-picker" value="#ffffff" style="width:32px;height:26px;border:none;border-radius:5px;cursor:pointer;" onchange="dpSetBg(this.value)">
+        </div>
+      </div>
+
+      <!-- PROPS -->
+      <div id="dp-tab-props" class="dp-panel">
+        <div id="dp-no-sel" style="text-align:center;padding:24px 8px;color:var(--text3);font-size:0.72rem;">Seleccioná un elemento</div>
+        <div id="dp-sel-props" style="display:none">
+          <div class="dp-section">Posición</div>
+          <div class="dp-prop-row">
+            <div class="dp-prop-label">X</div><input class="dp-prop-input" id="dp-px" type="number" onchange="dpUpdateProp('left',+this.value*dpScale)">
+            <div class="dp-prop-label" style="text-align:right">Y</div><input class="dp-prop-input" id="dp-py" type="number" onchange="dpUpdateProp('top',+this.value*dpScale)">
+          </div>
+          <div class="dp-prop-row">
+            <div class="dp-prop-label">Rot</div><input class="dp-prop-input" id="dp-pangle" type="number" onchange="dpUpdateProp('angle',+this.value)">
+            <div class="dp-prop-label" style="text-align:right">Opa</div><input class="dp-prop-input" id="dp-popacity" type="range" min="0" max="1" step="0.01" oninput="dpUpdateProp('opacity',+this.value)">
+          </div>
+          <div id="dp-text-props">
+            <div class="dp-section">Texto</div>
+            <div class="dp-prop-row">
+              <div class="dp-prop-label">Tamaño</div><input class="dp-prop-input" id="dp-pfontsize" type="number" onchange="dpUpdateTextProp('fontSize',+this.value*dpScale)">
+            </div>
+            <div class="dp-prop-row">
+              <div class="dp-prop-label">Color</div>
+              <input type="color" id="dp-ptextcolor" onchange="dpUpdateTextProp('fill',this.value)" style="width:32px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+            </div>
+            <div class="dp-prop-row">
+              <div class="dp-prop-label">Fuente</div>
+              <select class="dp-prop-input" id="dp-pfont" onchange="dpUpdateTextProp('fontFamily',this.value)">
+                <option>Inter</option><option>Arial</option><option>Georgia</option><option>Impact</option><option>Courier New</option><option>Times New Roman</option><option>Verdana</option>
+              </select>
+            </div>
+            <div class="dp-btn-row">
+              <button class="dp-prop-btn" id="dp-bold" onclick="dpToggleText('fontWeight','bold','normal')"><b>B</b></button>
+              <button class="dp-prop-btn" id="dp-italic" onclick="dpToggleText('fontStyle','italic','normal')"><i>I</i></button>
+              <button class="dp-prop-btn" id="dp-underline" onclick="dpToggleText('underline',true,false)"><u>U</u></button>
+              <button class="dp-prop-btn" onclick="dpUpdateTextProp('textAlign','left')">L</button>
+              <button class="dp-prop-btn" onclick="dpUpdateTextProp('textAlign','center')">C</button>
+              <button class="dp-prop-btn" onclick="dpUpdateTextProp('textAlign','right')">R</button>
+            </div>
+          </div>
+          <div id="dp-shape-props">
+            <div class="dp-section">Color</div>
+            <div class="dp-prop-row">
+              <div class="dp-prop-label">Relleno</div>
+              <input type="color" id="dp-pfill" onchange="dpUpdateProp('fill',this.value)" style="width:32px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+              <div class="dp-prop-label" style="text-align:right">Borde</div>
+              <input type="color" id="dp-pstroke" onchange="dpUpdateProp('stroke',this.value)" style="width:32px;height:26px;border:none;border-radius:5px;cursor:pointer;">
+            </div>
+          </div>
+          <div class="dp-section">Orden</div>
+          <div class="dp-btn-row">
+            <button class="dp-prop-btn" onclick="dpCanvas.bringToFront(dpCanvas.getActiveObject());dpSave()">▲▲</button>
+            <button class="dp-prop-btn" onclick="dpCanvas.bringForward(dpCanvas.getActiveObject());dpSave()">▲</button>
+            <button class="dp-prop-btn" onclick="dpCanvas.sendBackwards(dpCanvas.getActiveObject());dpSave()">▼</button>
+            <button class="dp-prop-btn" onclick="dpCanvas.sendToBack(dpCanvas.getActiveObject());dpSave()">▼▼</button>
+          </div>
+          <button class="dp-prop-btn" style="width:100%;margin-top:6px;" onclick="dpDuplicate()">Duplicar</button>
+        </div>
+      </div>
+
+      <!-- LAYERS -->
+      <div id="dp-tab-layers" class="dp-panel">
+        <div id="dp-layers-list"></div>
+      </div>
+    </div>
+
+    <!-- CANVAS -->
+    <div id="design-canvas-area">
+      <div id="design-canvas-wrap">
+        <canvas id="dp-canvas"></canvas>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- SETTINGS PANEL -->
@@ -5888,19 +6155,262 @@ function initTutorial() {
 ══════════════════════════════════════════════════════════ */
 (function() {
   const panel = document.getElementById('design-panel');
+  let dpInitialized = false;
+
   document.getElementById('design-btn').addEventListener('click', () => {
     panel.classList.add('open');
+    if (!dpInitialized) { dpInitialized = true; initDesignEditor(); }
     sfx('edit');
   });
   document.getElementById('design-panel-close').addEventListener('click', () => {
-    panel.classList.remove('open');
-    sfx('edit');
+    panel.classList.remove('open'); sfx('edit');
   });
-  // Escape key closes it
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && panel.classList.contains('open')) panel.classList.remove('open');
+    if (e.key === 'Escape' && panel.classList.contains('open') && !document.getElementById('size-modal').classList.contains('open')) {
+      panel.classList.remove('open');
+    }
   });
+
+  function initDesignEditor() {
+    // Load Fabric.js dynamically
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js';
+    s.onload = setupCanvas;
+    document.head.appendChild(s);
+  }
+
+  function setupCanvas() {
+    const area  = document.getElementById('design-canvas-area');
+    const wrap  = document.getElementById('design-canvas-wrap');
+    const maxW  = area.offsetWidth  - 40;
+    const maxH  = area.offsetHeight - 40;
+    window.dpCW = 1080; window.dpCH = 1080;
+    window.dpScale = Math.min(maxW/dpCW, maxH/dpCH, 1);
+
+    wrap.style.width  = (dpCW * dpScale) + 'px';
+    wrap.style.height = (dpCH * dpScale) + 'px';
+
+    window.dpCanvas = new fabric.Canvas('dp-canvas', {
+      width: dpCW * dpScale, height: dpCH * dpScale,
+      backgroundColor: '#ffffff', preserveObjectStacking: true,
+    });
+    dpCanvas.setZoom(dpScale);
+
+    // Undo/redo
+    window.dpHistory = []; window.dpHistIdx = -1;
+    window.dpSaving = false;
+
+    window.dpSave = function() {
+      if (dpSaving) return;
+      const j = JSON.stringify(dpCanvas.toJSON(['id']));
+      dpHistory = dpHistory.slice(0, dpHistIdx + 1);
+      dpHistory.push(j); dpHistIdx = dpHistory.length - 1;
+      dpRenderLayers();
+    };
+
+    dpCanvas.on('object:modified', dpSave);
+    dpCanvas.on('object:added', dpSave);
+    dpCanvas.on('object:removed', dpSave);
+    dpCanvas.on('selection:created', dpUpdateProps);
+    dpCanvas.on('selection:updated', dpUpdateProps);
+    dpCanvas.on('selection:cleared', () => {
+      document.getElementById('dp-no-sel').style.display = 'block';
+      document.getElementById('dp-sel-props').style.display = 'none';
+    });
+    dpCanvas.on('after:render', dpRenderLayers);
+    dpSave();
+
+    // BG color swatches
+    const BG = ['#ffffff','#000000','#09090f','#1a1a2e','#f0ece8','#fef3c7','#ecfdf5','#eff6ff','#fdf4ff','#fff1f2','#7c3aed','#2563eb','#059669','#d97706','#dc2626','#f472b6'];
+    const grid = document.getElementById('dp-bg-colors');
+    BG.forEach(c => {
+      const b = document.createElement('div');
+      b.className = 'dp-swatch';
+      b.style.background = c;
+      if (c === '#ffffff') b.style.border = '2px solid rgba(0,0,0,0.2)';
+      b.addEventListener('click', () => dpSetBg(c));
+      grid.appendChild(b);
+    });
+
+    // Keyboard shortcuts inside design panel
+    panel.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+      if ((e.ctrlKey||e.metaKey) && e.key==='z') { e.preventDefault(); dpUndo(); }
+      if ((e.ctrlKey||e.metaKey) && e.key==='y') { e.preventDefault(); dpRedo(); }
+      if ((e.ctrlKey||e.metaKey) && e.key==='d') { e.preventDefault(); dpDuplicate(); }
+      if ((e.key==='Delete'||e.key==='Backspace') && dpCanvas.getActiveObject()) { e.preventDefault(); dpDelete(); }
+    });
+  }
 })();
+
+// ── Design editor global functions ───────────────────────
+function dpTab(name, btn) {
+  document.querySelectorAll('.dp-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.dp-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('dp-tab-'+name).classList.add('active');
+}
+
+function dpAddText(text, size, bold) {
+  if (!window.dpCanvas) return;
+  const t = new fabric.IText(text, {
+    left: dpCW*dpScale/2, top: dpCH*dpScale/2,
+    originX:'center', originY:'center',
+    fontSize: size*dpScale, fontFamily:'Inter',
+    fontWeight: bold?'bold':'normal',
+    fill: dpCanvas.backgroundColor==='#ffffff'?'#1a1a2e':'#ffffff',
+    id: Math.random().toString(36).slice(2,9),
+  });
+  dpCanvas.add(t); dpCanvas.setActiveObject(t); dpCanvas.renderAll();
+}
+
+function dpAddRect() {
+  if (!window.dpCanvas) return;
+  const r = new fabric.Rect({ left:dpCW*dpScale/2-100*dpScale, top:dpCH*dpScale/2-60*dpScale, width:200*dpScale, height:120*dpScale, fill:'#9b6fff', rx:8*dpScale, ry:8*dpScale });
+  dpCanvas.add(r); dpCanvas.setActiveObject(r); dpCanvas.renderAll();
+}
+
+function dpAddCircle() {
+  if (!window.dpCanvas) return;
+  const c = new fabric.Circle({ left:dpCW*dpScale/2-60*dpScale, top:dpCH*dpScale/2-60*dpScale, radius:60*dpScale, fill:'#4f9eff' });
+  dpCanvas.add(c); dpCanvas.setActiveObject(c); dpCanvas.renderAll();
+}
+
+function dpAddTriangle() {
+  if (!window.dpCanvas) return;
+  const t = new fabric.Triangle({ left:dpCW*dpScale/2-60*dpScale, top:dpCH*dpScale/2-60*dpScale, width:120*dpScale, height:100*dpScale, fill:'#34d399' });
+  dpCanvas.add(t); dpCanvas.setActiveObject(t); dpCanvas.renderAll();
+}
+
+function dpAddLine() {
+  if (!window.dpCanvas) return;
+  const l = new fabric.Line([50*dpScale, dpCH*dpScale/2, (dpCW-50)*dpScale, dpCH*dpScale/2], { stroke:'#ffffff', strokeWidth:3*dpScale });
+  dpCanvas.add(l); dpCanvas.setActiveObject(l); dpCanvas.renderAll();
+}
+
+function dpAddImage(e) {
+  if (!window.dpCanvas) return;
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    fabric.Image.fromURL(ev.target.result, img => {
+      const maxW = dpCW*dpScale*0.6;
+      if (img.width > maxW) img.scaleToWidth(maxW);
+      img.set({ left:dpCW*dpScale/2, top:dpCH*dpScale/2, originX:'center', originY:'center' });
+      dpCanvas.add(img); dpCanvas.setActiveObject(img); dpCanvas.renderAll();
+    });
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+
+function dpSetBg(color) {
+  if (!window.dpCanvas) return;
+  dpCanvas.setBackgroundColor(color, dpCanvas.renderAll.bind(dpCanvas));
+  document.getElementById('dp-bg-picker').value = color;
+  dpSave();
+}
+
+function dpUpdateProps() {
+  const obj = dpCanvas.getActiveObject(); if (!obj) return;
+  document.getElementById('dp-no-sel').style.display='none';
+  document.getElementById('dp-sel-props').style.display='block';
+  document.getElementById('dp-px').value = Math.round(obj.left/dpScale);
+  document.getElementById('dp-py').value = Math.round(obj.top/dpScale);
+  document.getElementById('dp-pangle').value = Math.round(obj.angle||0);
+  document.getElementById('dp-popacity').value = obj.opacity??1;
+  const isText = ['i-text','textbox','text'].includes(obj.type);
+  document.getElementById('dp-text-props').style.display = isText?'block':'none';
+  document.getElementById('dp-shape-props').style.display = !isText?'block':'none';
+  if (isText) {
+    document.getElementById('dp-pfontsize').value = Math.round((obj.fontSize||18)/dpScale);
+    document.getElementById('dp-pfont').value = obj.fontFamily||'Inter';
+    document.getElementById('dp-ptextcolor').value = obj.fill||'#000000';
+    document.getElementById('dp-bold').classList.toggle('active', obj.fontWeight==='bold');
+    document.getElementById('dp-italic').classList.toggle('active', obj.fontStyle==='italic');
+    document.getElementById('dp-underline').classList.toggle('active', !!obj.underline);
+  } else if (typeof obj.fill === 'string') {
+    document.getElementById('dp-pfill').value = obj.fill||'#9b6fff';
+    document.getElementById('dp-pstroke').value = obj.stroke||'#000000';
+  }
+  dpTab('props', document.querySelectorAll('.dp-tab')[1]);
+}
+
+function dpUpdateProp(key, val) {
+  const obj = dpCanvas.getActiveObject(); if (!obj) return;
+  obj.set(key, typeof val==='string' && !isNaN(val) ? parseFloat(val) : val);
+  obj.setCoords(); dpCanvas.renderAll(); dpSave();
+}
+
+function dpUpdateTextProp(key, val) {
+  const obj = dpCanvas.getActiveObject(); if (!obj) return;
+  obj.set(key, val); dpCanvas.renderAll(); dpSave();
+}
+
+function dpToggleText(key, on, off) {
+  const obj = dpCanvas.getActiveObject(); if (!obj) return;
+  obj.set(key, obj[key]===on ? off : on);
+  dpCanvas.renderAll(); dpSave(); dpUpdateProps();
+}
+
+function dpUndo() {
+  if (!window.dpHistory || dpHistIdx<=0) return;
+  dpHistIdx--;
+  dpSaving=true;
+  dpCanvas.loadFromJSON(dpHistory[dpHistIdx], ()=>{ dpCanvas.renderAll(); dpSaving=false; dpRenderLayers(); });
+}
+
+function dpRedo() {
+  if (!window.dpHistory || dpHistIdx>=dpHistory.length-1) return;
+  dpHistIdx++;
+  dpSaving=true;
+  dpCanvas.loadFromJSON(dpHistory[dpHistIdx], ()=>{ dpCanvas.renderAll(); dpSaving=false; dpRenderLayers(); });
+}
+
+function dpDelete() {
+  if (!window.dpCanvas) return;
+  const obj = dpCanvas.getActiveObject(); if (!obj) return;
+  if (obj.type==='activeSelection') { obj.forEachObject(o=>dpCanvas.remove(o)); dpCanvas.discardActiveObject(); }
+  else dpCanvas.remove(obj);
+  dpCanvas.renderAll();
+}
+
+function dpDuplicate() {
+  if (!window.dpCanvas) return;
+  const obj = dpCanvas.getActiveObject(); if (!obj) return;
+  obj.clone(clone => { clone.set({left:obj.left+20,top:obj.top+20}); dpCanvas.add(clone); dpCanvas.setActiveObject(clone); dpCanvas.renderAll(); });
+}
+
+function dpRenderLayers() {
+  if (!window.dpCanvas) return;
+  const list = document.getElementById('dp-layers-list');
+  list.innerHTML='';
+  const objs = dpCanvas.getObjects().slice().reverse();
+  if (!objs.length) { list.innerHTML='<div style="text-align:center;padding:16px;color:var(--text3);font-size:0.7rem;">Sin elementos</div>'; return; }
+  const active = dpCanvas.getActiveObject();
+  objs.forEach(obj => {
+    const item = document.createElement('div');
+    item.className = 'dp-layer-item' + (obj===active?' selected':'');
+    const icon = ['i-text','text'].includes(obj.type)?'📝':obj.type==='image'?'🖼️':'⬜';
+    const label = ['i-text','text'].includes(obj.type)?(obj.text?.slice(0,18)||'Texto'):(obj.type==='image'?'Imagen':obj.type);
+    item.innerHTML = `<span>${icon}</span><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.7rem">${label}</span><button class="dp-layer-del">✕</button>`;
+    item.querySelector('.dp-layer-del').addEventListener('click', e => { e.stopPropagation(); dpCanvas.remove(obj); dpCanvas.renderAll(); });
+    item.addEventListener('click', () => { dpCanvas.setActiveObject(obj); dpCanvas.renderAll(); dpUpdateProps(); });
+    list.appendChild(item);
+  });
+}
+
+function dpExportPNG() {
+  if (!window.dpCanvas) return;
+  const url = dpCanvas.toDataURL({format:'png', multiplier:1/dpScale});
+  const a = document.createElement('a'); a.href=url; a.download='diseño.png'; a.click();
+}
+
+function dpExportJPG() {
+  if (!window.dpCanvas) return;
+  const url = dpCanvas.toDataURL({format:'jpeg', quality:0.92, multiplier:1/dpScale});
+  const a = document.createElement('a'); a.href=url; a.download='diseño.jpg'; a.click();
+}
 
 /* ══════════════════════════════════════════════════════════
    SETTINGS + THEME
