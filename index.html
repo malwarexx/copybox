@@ -35,13 +35,13 @@ html {
 
 :root {
   /* ── Dark mode (default) ── */
-  --bg:        #07070d;
-  --bg2:       #0d0d16;
-  --surface:   rgba(255,255,255,0.04);
-  --surface2:  rgba(255,255,255,0.07);
-  --surface3:  rgba(255,255,255,0.10);
-  --border:    rgba(255,255,255,0.07);
-  --border2:   rgba(255,255,255,0.13);
+  --bg:        #04060f;
+  --bg2:       #080c1a;
+  --surface:   rgba(255,255,255,0.05);
+  --surface2:  rgba(255,255,255,0.08);
+  --surface3:  rgba(255,255,255,0.12);
+  --border:    rgba(255,255,255,0.08);
+  --border2:   rgba(255,255,255,0.14);
   --text:      #dde1f0;
   --text2:     rgba(221,225,240,0.55);
   --text3:     rgba(221,225,240,0.28);
@@ -3365,6 +3365,9 @@ body.is-mobile #ctrl-hint { display: none; }
       <span id="cp-load-label">Cargar clientes</span>
     </button>
     <div id="cp-sheet-status" style="font-size:0.68rem;color:var(--text3);text-align:center;margin-top:6px;min-height:16px;"></div>
+    <div style="font-size:0.62rem;color:var(--text3);text-align:center;margin-top:4px;line-height:1.5;">
+      💡 La hoja debe estar en <strong style="color:var(--text2)">"Cualquiera con el enlace"</strong> para no necesitar login
+    </div>
   </div>
 </div>
 
@@ -3657,14 +3660,20 @@ let bgPaused = false;
   resize();
 
   const orbColors = [[155,111,255],[79,158,255],[52,211,153],[244,114,182]];
+  // Add extra large background orbs for depth
+  const bgOrbs = [
+    { x:W*0.15, y:H*0.2,  vx:0.06, vy:0.04,  r:420, c:[100,60,220],  a:0.06 },
+    { x:W*0.8,  y:H*0.75, vx:-0.05,vy:-0.03, r:380, c:[30,120,255],  a:0.05 },
+    { x:W*0.5,  y:H*0.5,  vx:0.03, vy:0.06,  r:320, c:[52,211,153],  a:0.035},
+    { x:W*0.85, y:H*0.15, vx:-0.04,vy:0.05,  r:280, c:[220,80,180],  a:0.04 },
+  ];
   for (let i = 0; i < 4; i++) {
     const c = orbColors[i];
     orbs.push({ x:Math.random()*W, y:Math.random()*H,
       vx:(Math.random()-0.5)*0.18, vy:(Math.random()-0.5)*0.18,
-      r:260+Math.random()*160, c, a:0.04+Math.random()*0.025 });
+      r:200+Math.random()*120, c, a:0.055+Math.random()*0.03 });
   }
 
-  // Throttle to ~20fps — orbs move slow, no need for 60fps
   let last = 0;
   function draw(ts) {
     rafId = requestAnimationFrame(draw);
@@ -3675,36 +3684,65 @@ let bgPaused = false;
     const lightMode = document.body.classList.contains('light-mode');
 
     if (lightMode) {
-      // Light mode: warm pastel gradient bg + soft colored orbs
-      ctx.fillStyle = '#f0ece8';
-      ctx.fillRect(0, 0, W, H);
-      const lightOrbs = [[255,182,193],[147,197,253],[167,243,208],[253,230,138]];
+      // Light: creamy warm base + soft aurora blobs
+      const lg = ctx.createLinearGradient(0,0,W,H);
+      lg.addColorStop(0,'#f5f0ff');
+      lg.addColorStop(0.4,'#fff5f0');
+      lg.addColorStop(1,'#f0f8ff');
+      ctx.fillStyle = lg;
+      ctx.fillRect(0,0,W,H);
+
+      const lightOrbs = [[200,160,255,0.18],[150,210,255,0.15],[170,255,220,0.13],[255,210,150,0.12]];
       for (let i=0; i<orbs.length; i++) {
-        const o = orbs[i];
-        o.x += o.vx; o.y += o.vy;
-        if (o.x < -o.r) o.x = W+o.r; if (o.x > W+o.r) o.x = -o.r;
-        if (o.y < -o.r) o.y = H+o.r; if (o.y > H+o.r) o.y = -o.r;
+        const o = orbs[i]; o.x+=o.vx; o.y+=o.vy;
+        if(o.x<-o.r)o.x=W+o.r; if(o.x>W+o.r)o.x=-o.r;
+        if(o.y<-o.r)o.y=H+o.r; if(o.y>H+o.r)o.y=-o.r;
         const c = lightOrbs[i];
-        const g = ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-        g.addColorStop(0,`rgba(${c},0.35)`);
-        g.addColorStop(1,`rgba(${c},0)`);
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fill();
+        const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r*1.4);
+        g.addColorStop(0,`rgba(${c[0]},${c[1]},${c[2]},${c[3]})`);
+        g.addColorStop(1,`rgba(${c[0]},${c[1]},${c[2]},0)`);
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(o.x,o.y,o.r*1.4,0,Math.PI*2); ctx.fill();
       }
     } else {
-      // Dark mode: original dark orbs
-      ctx.fillStyle = '#07070d';
-      ctx.fillRect(0, 0, W, H);
-      for (const o of orbs) {
-        o.x += o.vx; o.y += o.vy;
-        if (o.x < -o.r) o.x = W+o.r; if (o.x > W+o.r) o.x = -o.r;
-        if (o.y < -o.r) o.y = H+o.r; if (o.y > H+o.r) o.y = -o.r;
-        const g = ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+      // Dark: deep space — layered base gradient + large background orbs + bright foreground orbs
+      // 1. Multi-stop base gradient (not flat)
+      const bg = ctx.createRadialGradient(W*0.3,H*0.2,0,W*0.5,H*0.5,Math.max(W,H)*0.9);
+      bg.addColorStop(0,  '#0e0820');
+      bg.addColorStop(0.3,'#070b18');
+      bg.addColorStop(0.7,'#04060f');
+      bg.addColorStop(1,  '#020408');
+      ctx.fillStyle = bg;
+      ctx.fillRect(0,0,W,H);
+
+      // 2. Large deep background blobs (low opacity, large radius = aurora feel)
+      for (const o of bgOrbs) {
+        o.x+=o.vx; o.y+=o.vy;
+        if(o.x<-o.r)o.x=W+o.r; if(o.x>W+o.r)o.x=-o.r;
+        if(o.y<-o.r)o.y=H+o.r; if(o.y>H+o.r)o.y=-o.r;
+        const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
         g.addColorStop(0,`rgba(${o.c},${o.a})`);
+        g.addColorStop(0.5,`rgba(${o.c},${o.a*0.4})`);
         g.addColorStop(1,`rgba(${o.c},0)`);
-        ctx.fillStyle = g;
-        ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fill();
       }
+
+      // 3. Foreground brighter orbs
+      for (const o of orbs) {
+        o.x+=o.vx; o.y+=o.vy;
+        if(o.x<-o.r)o.x=W+o.r; if(o.x>W+o.r)o.x=-o.r;
+        if(o.y<-o.r)o.y=H+o.r; if(o.y>H+o.r)o.y=-o.r;
+        const g=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
+        g.addColorStop(0,`rgba(${o.c},${o.a})`);
+        g.addColorStop(0.6,`rgba(${o.c},${o.a*0.3})`);
+        g.addColorStop(1,`rgba(${o.c},0)`);
+        ctx.fillStyle=g; ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fill();
+      }
+
+      // 4. Vignette overlay (edges darker)
+      const vig = ctx.createRadialGradient(W/2,H/2,H*0.3,W/2,H/2,Math.max(W,H)*0.75);
+      vig.addColorStop(0,'rgba(0,0,0,0)');
+      vig.addColorStop(1,'rgba(0,0,0,0.45)');
+      ctx.fillStyle=vig; ctx.fillRect(0,0,W,H);
     }
   }
   draw(0);
@@ -5562,7 +5600,7 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     return m ? m[1] : val.trim();
   }
 
-  // ── Load from Google Sheets via Sheets API ──
+  // ── Load from Google Sheets — no login required if sheet is public ──
   cpLoadBtn.addEventListener('click', async () => {
     const raw = cpSheetInput.value.trim();
     if (!raw) { cpSheetInput.style.borderColor='var(--red)'; setTimeout(()=>cpSheetInput.style.borderColor='',1500); return; }
@@ -5570,50 +5608,85 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
     const sheetId = parseSheetId(raw);
     localStorage.setItem(SHEET_ID_KEY, raw);
 
-    // Need Google token
-    const token = localStorage.getItem('copybox_gtoken_tmp') || (window.getGToken ? window.getGToken() : null);
-    if (!token) {
-      cpStatus.textContent = '⚠️ Conectá tu cuenta Google primero (botón ☁️ Datos)';
-      cpStatus.style.color = 'var(--yellow)';
-      return;
-    }
-
     cpLoadLabel.textContent = 'Cargando...';
     cpLoadBtn.disabled = true;
     cpStatus.textContent = '';
 
+    // API key-free public endpoint — works if sheet is set to "anyone with link can view"
+    // No login required at all
+    async function fetchSheetPublic(sheetName) {
+      const range = encodeURIComponent(`${sheetName}!A1:Z200`);
+      // Use the v4 API with no auth — works for public sheets
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(sheetName)}&range=A1:Z200`;
+      const res = await fetch(url);
+      const text = await res.text();
+      // Parse Google Visualization JSON (wrapped in callback)
+      const json = JSON.parse(text.replace(/^[^(]*\(/, '').replace(/\);?$/, ''));
+      if (!json?.table?.rows?.length) return null;
+      // Convert GViz format to 2D array
+      const cols = json.table.cols.length;
+      const rows = json.table.rows.map(row =>
+        Array.from({length: cols}, (_, i) => {
+          const cell = row.c?.[i];
+          return cell?.v != null ? String(cell.v) : (cell?.f || '');
+        })
+      );
+      return { values: rows };
+    }
+
+    // Also try with token if available (for private sheets)
+    const token = localStorage.getItem('copybox_gtoken_tmp');
+
+    async function fetchSheetPrivate(sheetName) {
+      if (!token) return null;
+      const range = encodeURIComponent(`${sheetName}!A1:Z200`);
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`;
+      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      const d = await res.json();
+      if (d.error) return null;
+      return d;
+    }
+
     try {
-      // Try multiple common sheet names
       const sheetNames = ['Hoja 1', 'Hoja1', 'Sheet1', 'Sheet 1', 'Página1', 'Página 1'];
       let data = null;
 
+      // Try public access first (no login needed)
       for (const sheetName of sheetNames) {
-        const range = encodeURIComponent(`${sheetName}!A1:Z200`);
-        const url   = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`;
-        const res   = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-        const d     = await res.json();
-        if (!d.error) { data = d; break; }
-        if (d.error.code === 403) throw new Error(d.error.message);
+        try {
+          const d = await fetchSheetPublic(sheetName);
+          if (d && d.values?.length) { data = d; break; }
+        } catch(e) { /* try next */ }
       }
 
-      // Fallback: detect sheet name from metadata
-      if (!data) {
-        const metaRes  = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`, { headers: { Authorization: `Bearer ${token}` } });
-        const metaData = await metaRes.json();
-        if (metaData.error) throw new Error(metaData.error.message);
-        const firstSheet = metaData.sheets?.[0]?.properties?.title;
-        if (firstSheet) {
-          const range = encodeURIComponent(`${firstSheet}!A1:Z200`);
-          const url   = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}`;
-          const res   = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-          data = await res.json();
-          if (data.error) throw new Error(data.error.message);
-        } else {
-          throw new Error('No se encontró ninguna hoja en el archivo');
+      // If public failed, try with token (private sheet)
+      if (!data && token) {
+        for (const sheetName of sheetNames) {
+          const d = await fetchSheetPrivate(sheetName);
+          if (d) { data = d; break; }
+        }
+
+        // Last resort: get sheet name from metadata then fetch
+        if (!data) {
+          const metaRes = await fetch(
+            `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          const meta = await metaRes.json();
+          const firstSheet = meta.sheets?.[0]?.properties?.title;
+          if (firstSheet) {
+            data = await fetchSheetPrivate(firstSheet);
+          }
         }
       }
 
-      if (data.error) throw new Error(data.error.message);
+      if (!data || !data.values?.length) {
+        throw new Error(
+          token
+            ? 'No se pudo leer la hoja. Verificá que la URL sea correcta.'
+            : 'La hoja no es pública. Abrí la hoja → Compartir → "Cualquiera con el enlace puede ver". O iniciá sesión con Google para acceder a hojas privadas.'
+        );
+      }
 
       const allRows = data.values || [];
       if (!allRows.length) throw new Error('La hoja está vacía');
