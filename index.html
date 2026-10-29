@@ -5693,30 +5693,34 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
 
       // Auto-detect header row and columns (scan first 10 rows)
       let headerRowIdx = -1;
-      let appColIdx = -1;
-      let nameColIdx = -1;
+      let appColIdx    = -1;
+      let nameColIdx   = -1;
 
       for (let ri = 0; ri < Math.min(10, allRows.length); ri++) {
         const row = allRows[ri].map(h => (h||'').toLowerCase().trim());
-        const ai = row.findIndex(h => h.includes('chaleco') || h.includes('fuente') || h.includes('app'));
-        const ni = row.findIndex(h => h.includes('nombre'));
+        const ai = row.findIndex(h =>
+          h.includes('chaleco') || h.includes('fuente') || h.includes('app')
+        );
+        const ni = row.findIndex(h =>
+          h.includes('nombre')
+        );
         if (ai !== -1 && ni !== -1) {
           headerRowIdx = ri;
-          appColIdx = ai;
-          nameColIdx = ni;
+          appColIdx    = ai;
+          nameColIdx   = ni;
           break;
         }
       }
 
+      // If no header row found, fall back to columns E (4) and F (5) — 0-indexed
+      // Those are the columns identified from your sheet
       if (appColIdx === -1 || nameColIdx === -1) {
-        const sample = allRows.slice(0, 3).map(r => r.slice(0, 8).join(', ')).join('\n');
-        throw new Error(
-          `No se encontraron las columnas.\nPrimeras filas detectadas:\n${sample}\n` +
-          `Necesito columnas con "chaleco"/"fuente"/"app" y "nombre del cliente"`
-        );
+        headerRowIdx = -1; // no header, start from row 0
+        appColIdx    = 4;  // column E
+        nameColIdx   = 5;  // column F
       }
 
-      const rows = allRows.slice(headerRowIdx + 1); // skip header row
+      const rows = allRows.slice(headerRowIdx + 1); // skip header row (or slice from 0 if no header)
 
       function cleanCell(val) {
         if (!val) return '';
