@@ -8,7 +8,26 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 <style>
+/* ── GSAP scroll states ── */
+.category-section {
+  will-change: transform, opacity;
+}
+.copy-box {
+  will-change: transform, opacity;
+}
+/* Smooth scroll for the whole page */
+html {
+  scroll-behavior: auto; /* let GSAP handle it */
+}
+/* Reveal state — set by GSAP before animation */
+.gsap-hidden {
+  opacity: 0;
+  transform: translateY(40px) scale(0.96);
+}
+
 /* ══════════════════════════════════════════════════════════
    RESET & TOKENS
 ══════════════════════════════════════════════════════════ */
@@ -6691,6 +6710,120 @@ function dpExportJPG() {
 })();
 
 /* ══════════════════════════════════════════════════════════
+   GSAP SCROLL ANIMATIONS
+══════════════════════════════════════════════════════════ */
+function initGSAP() {
+  if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // ── Category sections: slide up + fade in ──
+  gsap.utils.toArray('.category-section').forEach((section, i) => {
+    gsap.from(section, {
+      scrollTrigger: {
+        trigger: section,
+        start: 'top 88%',
+        end: 'top 40%',
+        toggleActions: 'play none none reverse',
+        scrub: false,
+      },
+      opacity: 0,
+      y: 50,
+      scale: 0.97,
+      duration: 0.7,
+      delay: i * 0.05,
+      ease: 'power3.out',
+    });
+  });
+
+  // ── Category chip: pop in with slight bounce ──
+  gsap.utils.toArray('.category-box').forEach((chip) => {
+    gsap.from(chip, {
+      scrollTrigger: {
+        trigger: chip,
+        start: 'top 90%',
+        toggleActions: 'play none none none',
+      },
+      scale: 0.7,
+      opacity: 0,
+      duration: 0.5,
+      ease: 'back.out(2)',
+    });
+  });
+
+  // ── Copy boxes: staggered reveal with scale ──
+  gsap.utils.toArray('.copyboxes-grid').forEach(grid => {
+    const boxes = grid.querySelectorAll('.copy-box');
+    if (!boxes.length) return;
+    gsap.from(boxes, {
+      scrollTrigger: {
+        trigger: grid,
+        start: 'top 85%',
+        end: 'top 30%',
+        toggleActions: 'play none none reverse',
+      },
+      opacity: 0,
+      y: 30,
+      scale: 0.88,
+      duration: 0.55,
+      stagger: 0.06,
+      ease: 'power2.out',
+    });
+  });
+
+  // ── Parallax on bg canvas orbs — subtle depth effect ──
+  ScrollTrigger.create({
+    trigger: '#app',
+    start: 'top top',
+    end: 'bottom bottom',
+    onUpdate: (self) => {
+      const canvas = document.getElementById('bg-canvas');
+      if (canvas) {
+        gsap.to(canvas, {
+          y: self.progress * -80,
+          duration: 0.1,
+          ease: 'none',
+          overwrite: 'auto',
+        });
+      }
+    }
+  });
+
+  // ── Header: slight shrink on scroll ──
+  ScrollTrigger.create({
+    start: 'top top',
+    end: '+=100',
+    onUpdate: (self) => {
+      gsap.to('header', {
+        '--header-h': self.progress > 0.1 ? '50px' : '60px',
+        backdropFilter: `blur(${20 + self.progress * 10}px)`,
+        duration: 0.3,
+        ease: 'power1.out',
+        overwrite: 'auto',
+      });
+    }
+  });
+
+  // Re-run when renderApp is called (new categories added)
+  window._gsapRefresh = () => {
+    ScrollTrigger.refresh();
+    initGSAP();
+  };
+}
+
+// Hook into renderApp to refresh GSAP when content changes
+const _origRenderApp = renderApp;
+window.renderApp = function(...args) {
+  _origRenderApp(...args);
+  if (typeof ScrollTrigger !== 'undefined') {
+    setTimeout(() => {
+      ScrollTrigger.refresh();
+      initGSAP();
+    }, 100);
+  }
+};
+
+/* ══════════════════════════════════════════════════════════
    INIT
 ══════════════════════════════════════════════════════════ */
 function init() {
@@ -6706,6 +6839,9 @@ function init() {
 
   // Show tutorial after a short delay so the app is visible first
   setTimeout(() => { try { initTutorial(); } catch(e) {} }, 400);
+
+  // Init GSAP animations after render
+  setTimeout(initGSAP, 600);
 }
 
 function hideSplash() {
