@@ -5602,12 +5602,13 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
       // Keep only words made of letters (and spaces/accents) — strips any numbers/symbols
       function cleanCell(val) {
         if (!val) return '';
-        return val
-          .split('\n')                          // split multiline cells
-          .join(' ')                            // join into one string
-          .replace(/[^a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s]/g, ' ')  // remove anything that's not a letter
-          .replace(/\s+/g, ' ')                // collapse spaces
-          .trim();
+        // Split on newlines, take the last non-empty line (name comes after the censored number)
+        const lines = val.split('\n').map(l => l.trim()).filter(Boolean);
+        // If multiple lines, the name is on the last line
+        let result = lines.length > 1 ? lines[lines.length - 1] : lines[0] || '';
+        // Also strip leading censored phone pattern like "543*****0168 "
+        result = result.replace(/^\d[\d*•·]+\d\s*/, '').trim();
+        return result;
       }
 
       clients = rows
