@@ -5599,21 +5599,32 @@ Si el usuario pide generar textos sin especificar fase, preguntá primero. Respo
       const allRows = data.values || [];
       if (!allRows.length) throw new Error('La hoja está vacía');
 
-      // Auto-detect header row and columns
-      const headers = allRows[0].map(h => (h||'').toLowerCase().trim());
+      // Auto-detect header row and columns (scan first 10 rows)
+      let headerRowIdx = -1;
+      let appColIdx = -1;
+      let nameColIdx = -1;
 
-      // Find column indices by matching keywords
-      const appColIdx  = headers.findIndex(h => h.includes('chaleco') || h.includes('fuente') || h.includes('app'));
-      const nameColIdx = headers.findIndex(h => h.includes('nombre'));
+      for (let ri = 0; ri < Math.min(10, allRows.length); ri++) {
+        const row = allRows[ri].map(h => (h||'').toLowerCase().trim());
+        const ai = row.findIndex(h => h.includes('chaleco') || h.includes('fuente') || h.includes('app'));
+        const ni = row.findIndex(h => h.includes('nombre'));
+        if (ai !== -1 && ni !== -1) {
+          headerRowIdx = ri;
+          appColIdx = ai;
+          nameColIdx = ni;
+          break;
+        }
+      }
 
       if (appColIdx === -1 || nameColIdx === -1) {
+        const sample = allRows.slice(0, 3).map(r => r.slice(0, 8).join(', ')).join('\n');
         throw new Error(
-          `No se encontraron las columnas. Headers detectados: ${allRows[0].slice(0,8).join(', ')}\n` +
+          `No se encontraron las columnas.\nPrimeras filas detectadas:\n${sample}\n` +
           `Necesito columnas con "chaleco"/"fuente"/"app" y "nombre del cliente"`
         );
       }
 
-      const rows = allRows.slice(1); // skip header row
+      const rows = allRows.slice(headerRowIdx + 1); // skip header row
 
       function cleanCell(val) {
         if (!val) return '';
